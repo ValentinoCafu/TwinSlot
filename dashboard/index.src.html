@@ -1,0 +1,1041 @@
+<title>TwinSlot Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* superficie: gris Apple, tarjetas blancas, sin bordes duros */
+  --canvas:#F5F5F7; --panel:#FFFFFF; --panel-2:#FAFAFC; --panel-3:#EFEFF3;
+  --ink:#1D1D1F; --ink-2:#565A61; --ink-3:#76797F;
+  --line:#EAEAEF; --line-2:#D8D8DE;
+  --blue:#0A6CDC; --blue-ink:#0857B0; --blue-soft:#EAF2FD; --blue-mid:#9CC2F0;
+  --green:#177A5C; --green-fill:#1E9070; --green-soft:#E4F2EC; --green-mid:#9FCFBC;
+  --amber:#8A5A12; --amber-soft:#FBF0DE;
+  --red:#A8342A; --red-soft:#FCE9E6;
+  --sans:"DM Sans",-apple-system,BlinkMacSystemFont,"SF Pro Rounded","SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --mono:"DM Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+  --rail:246px; --insp:360px;
+  --r-lg:16px; --r-md:12px; --r-sm:9px; --r-pill:999px;
+  --shadow:0 1px 2px rgba(29,29,31,.05), 0 6px 18px -10px rgba(29,29,31,.14);
+  --shadow-lift:0 2px 5px rgba(29,29,31,.07), 0 14px 34px -14px rgba(29,29,31,.22);
+  --ease:cubic-bezier(.2,.8,.25,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--canvas); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.55; letter-spacing:-0.008em;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow:hidden;
+}
+::selection{background:#D6E6FB; color:#0D2340}
+:focus-visible{outline:2px solid var(--blue); outline-offset:2px; border-radius:8px}
+*::-webkit-scrollbar{width:12px;height:12px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#C9C9D0; border-radius:99px; border:3.5px solid var(--panel)}
+*::-webkit-scrollbar-thumb:hover{background:#AEAEB6}
+*{scrollbar-width:thin; scrollbar-color:#C9C9D0 transparent}
+h1,h2,h3,h4,p,dl,dd{margin:0}
+ul{margin:0; padding:0; list-style:none}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer; letter-spacing:inherit}
+input,select{font:inherit; color:inherit}
+table{border-collapse:separate; border-spacing:0; width:100%}
+.num,td.n,th.n{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.lbl{font-size:12px; font-weight:600; color:var(--ink-3)}
+
+/* ══ shell ══════════════════════════════════════════ */
+.app{display:grid; grid-template-columns:var(--rail) minmax(0,1fr); grid-template-rows:1fr 30px; height:100vh}
+.rail{grid-row:1/3; background:#1E2027; color:#C9CCD3; display:flex; flex-direction:column}
+.rail-brand{display:flex; align-items:center; gap:10px; padding:16px 16px 15px}
+.rail-brand b{color:#fff; font-size:15px; font-weight:600; letter-spacing:-0.02em}
+.rail-brand span{display:block; font-size:11.5px; color:#868C97; margin-top:1px}
+.rail-sec{padding:10px 18px 7px; font-size:11.5px; font-weight:600; color:#767C88}
+nav{padding:0 10px; display:grid; gap:2px}
+.nav-item{
+  display:flex; align-items:center; gap:11px; width:100%; padding:8px 11px; border-radius:10px;
+  font-size:13px; color:#B9BEC7; text-align:left; transition:background .14s, color .14s;
+}
+.nav-item svg{flex:none; opacity:.85}
+.nav-item:hover{background:#282B33; color:#E9EBEF}
+.nav-item[aria-current="page"]{background:#32363F; color:#fff; font-weight:500}
+.nav-item[aria-current="page"] svg{opacity:1; color:var(--green-mid)}
+.nav-count{margin-left:auto; font-size:11.5px; color:#7E848F; font-variant-numeric:tabular-nums; background:#2A2D35; padding:1px 7px; border-radius:var(--r-pill)}
+.nav-item[aria-current="page"] .nav-count{background:#3E434D; color:#C9CCD3}
+.rail-foot{margin-top:auto; padding:14px 18px 16px; font-size:11.5px; color:#868C97; display:grid; gap:6px}
+.rail-foot .r{display:flex; justify-content:space-between; gap:8px}
+.rail-foot b{color:#C9CCD3; font-weight:450; font-variant-numeric:tabular-nums}
+.dot-ok{width:6px;height:6px;border-radius:99px;background:#5FB395;display:inline-block;vertical-align:1px;margin-right:5px}
+
+.frame{grid-row:1/2; display:flex; flex-direction:column; min-width:0; overflow:hidden}
+.topbar{display:flex; align-items:center; gap:14px; padding:0 18px; height:56px; flex:none; background:var(--canvas)}
+.crumb{display:flex; align-items:baseline; gap:9px; min-width:0}
+.crumb h1{font-size:16px; font-weight:600; letter-spacing:-0.022em; white-space:nowrap}
+.crumb p{font-size:12.5px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tb-right{margin-left:auto; display:flex; align-items:center; gap:10px}
+.field{display:flex; align-items:center; border-radius:var(--r-sm); background:var(--panel); height:32px; overflow:hidden; box-shadow:var(--shadow)}
+.field label{padding:0 10px; font-size:12px; color:var(--ink-3); height:100%; display:flex; align-items:center; white-space:nowrap}
+.field input{border:0; outline:0; width:52px; padding:0 10px 0 0; font-size:13px; font-weight:500; font-variant-numeric:tabular-nums; background:transparent}
+.field input:focus{color:var(--blue-ink)}
+.seg{display:flex; border-radius:var(--r-sm); overflow:hidden; height:32px; background:var(--panel); padding:3px; gap:2px; box-shadow:var(--shadow)}
+.seg button{padding:0 12px; font-size:12.5px; color:var(--ink-2); border-radius:6px; white-space:nowrap; transition:background .14s, color .14s}
+.seg button:hover{background:var(--panel-3)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:#fff; font-weight:500}
+.btn{
+  display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 14px; border-radius:var(--r-sm);
+  font-size:12.5px; font-weight:500; background:var(--panel); color:var(--ink); white-space:nowrap;
+  box-shadow:var(--shadow); transition:background .14s, transform .14s var(--ease);
+}
+.btn:hover{background:var(--panel-2)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--ink); color:#fff}
+.btn-primary:hover{background:#33343A}
+.btn-primary[data-state="busy"]{background:var(--blue)}
+.btn-primary[data-state="done"]{background:var(--green-fill)}
+.btn-primary[data-state="busy"] svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.work{flex:1; min-height:0; overflow:auto; padding:2px 18px 20px}
+.view{display:none}
+.view[data-active="true"]{display:block}
+
+.statusbar{
+  grid-column:2/3; grid-row:2/3; display:flex; align-items:center; gap:0;
+  background:var(--canvas); font-size:11.5px; color:var(--ink-3); padding:0 8px; overflow-x:auto;
+}
+.statusbar span{padding:0 10px; height:100%; display:flex; align-items:center; gap:6px; white-space:nowrap}
+.statusbar span:last-child{margin-left:auto}
+.statusbar b{font-weight:500; color:var(--ink-2); font-variant-numeric:tabular-nums}
+
+/* ══ paneles ════════════════════════════════════════ */
+.panel{background:var(--panel); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden}
+.panel-head{display:flex; align-items:center; gap:10px; padding:0 18px; height:52px; flex:none; border-bottom:1px solid var(--line)}
+.panel-head h2{font-size:14.5px; font-weight:600; letter-spacing:-0.017em}
+.panel-head .sub{font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.panel-head .right{margin-left:auto; display:flex; align-items:center; gap:8px}
+.panel-body{padding:16px 18px 18px}
+.disclose summary{list-style:none; cursor:pointer; transition:background .14s}
+.disclose summary::-webkit-details-marker{display:none}
+.disclose summary:hover{background:var(--panel-2)}
+.disclose:not([open]) summary{border-bottom:0}
+.chev{margin-left:auto; width:8px; height:8px; border-right:1.7px solid var(--ink-3); border-bottom:1.7px solid var(--ink-3); transform:rotate(45deg) translateY(-2px); transition:transform .22s var(--ease)}
+.disclose[open] .chev{transform:rotate(-135deg) translateY(1px)}
+.grid-2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; align-items:start}
+.grid-main{display:grid; grid-template-columns:minmax(0,1fr) var(--insp); gap:14px; align-items:start}
+.stack{display:grid; gap:14px}
+
+/* tarjetas de indicador */
+.kpis{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+.kpi{padding:18px 20px 19px; background:var(--panel); border-radius:var(--r-md); box-shadow:var(--shadow); min-width:0}
+.kpi .k{font-size:13px; font-weight:500; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.kpi .v{font-size:32px; font-weight:600; letter-spacing:-0.032em; font-variant-numeric:tabular-nums; margin-top:6px; line-height:1.1}
+.kpi .v small{font-size:14px; font-weight:450; color:var(--ink-3); letter-spacing:-0.01em}
+.kpi .d{font-size:13px; color:var(--ink-3); margin-top:6px; display:flex; align-items:center; gap:5px; font-variant-numeric:tabular-nums}
+.kpi.is-gain .v{color:var(--green)}
+.kpi .trend{height:4px; border-radius:99px; background:var(--panel-3); margin-top:9px; overflow:hidden}
+.kpi .trend i{display:block; height:100%; border-radius:99px; background:var(--green-fill); transform:scaleX(0); transform-origin:left; transition:transform .8s var(--ease)}
+.is-live .kpi .trend i{transform:scaleX(1)}
+
+/* ══ tablas ═════════════════════════════════════════ */
+.tablewrap{overflow:auto}
+.tablewrap.scroll{max-height:calc(100vh - 280px)}
+table.data{font-size:13px}
+table.data thead th{
+  position:sticky; top:0; z-index:3; background:var(--panel); text-align:left;
+  font-size:12.5px; font-weight:500; color:var(--ink-3);
+  padding:12px 14px 11px; border-bottom:1px solid var(--line); white-space:nowrap; user-select:none;
+}
+table.data thead th.sortable{cursor:pointer; border-radius:8px 8px 0 0}
+table.data thead th.sortable:hover{color:var(--ink)}
+table.data thead th .caret{opacity:0; margin-left:4px; display:inline-block; transition:opacity .14s}
+table.data thead th[aria-sort] .caret{opacity:1}
+table.data thead th[aria-sort]{color:var(--ink); font-weight:600}
+table.data th.n,table.data td.n{text-align:right}
+table.data tbody td{padding:0 14px; height:42px; border-bottom:1px solid var(--line); white-space:nowrap; vertical-align:middle; transition:background .12s}
+table.data tbody tr:last-child td{border-bottom:0}
+table.data tbody tr.pick{cursor:pointer}
+table.data tbody tr.pick:hover td{background:var(--panel-2)}
+table.data tbody tr[aria-selected="true"] td{background:var(--blue-soft)}
+table.data tbody tr[aria-selected="true"] td:first-child{border-radius:9px 0 0 9px; box-shadow:inset 3px 0 0 var(--blue)}
+table.data tbody tr[aria-selected="true"] td:last-child{border-radius:0 9px 9px 0}
+table.data tfoot td{padding:0 14px; height:44px; border-top:1px solid var(--line); background:var(--panel-2); font-weight:500; font-variant-numeric:tabular-nums; position:sticky; bottom:0}
+.sku{font-family:var(--mono); font-size:12px; font-weight:500; letter-spacing:-0.02em}
+.dim{color:var(--ink-3)}
+.tag{display:inline-flex; align-items:center; height:20px; padding:0 9px; border-radius:var(--r-pill); font-size:11.5px; font-weight:600}
+.tag-A{background:var(--red-soft); color:var(--red)}
+.tag-B{background:var(--blue-soft); color:var(--blue-ink)}
+.tag-C{background:var(--panel-3); color:var(--ink-3)}
+.tag-mover{background:var(--green-soft); color:var(--green)}
+.tag-hold{background:var(--panel-3); color:var(--ink-3)}
+.tag-grua{background:var(--amber-soft); color:var(--amber)}
+.gain{color:var(--green); font-weight:500}
+.arrow{color:var(--ink-3); margin:0 6px}
+.cellbar{display:flex; align-items:center; gap:9px; min-width:150px}
+.cellbar .tr{position:relative; flex:1; height:16px; background:var(--panel-3); border-radius:var(--r-pill); overflow:hidden}
+.cellbar .fl{position:absolute; inset:0 auto 0 0; display:flex; border-radius:var(--r-pill); overflow:hidden; transform:scaleX(0); transform-origin:left; transition:transform .7s var(--ease)}
+.is-live .cellbar .fl{transform:scaleX(1)}
+.cellbar .keep{background:var(--line-2)}
+.cellbar .gainf{background:var(--green-fill)}
+.cellbar .pct{font-size:11.5px; color:var(--ink-3); width:36px; text-align:right; font-variant-numeric:tabular-nums}
+
+/* filtros */
+.filters{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:13px 18px; border-bottom:1px solid var(--line)}
+.sel{height:30px; border:0; border-radius:var(--r-sm); background:var(--panel-3); font-size:12.5px; padding:0 26px 0 11px; color:var(--ink-2);
+  appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' fill='none' stroke='%2376797F' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat; background-position:right 9px center; cursor:pointer; transition:background-color .14s}
+.sel:hover{background-color:#E7E7ED}
+.search{position:relative; display:flex; align-items:center}
+.search svg{position:absolute; left:10px; color:var(--ink-3); pointer-events:none}
+.search input{height:30px; border:0; border-radius:var(--r-sm); padding:0 11px 0 30px; font-size:12.5px; width:190px; outline:0; background:var(--panel-3)}
+.search input::placeholder{color:var(--ink-3)}
+.search input:focus{background:var(--panel); box-shadow:0 0 0 2px var(--blue-mid)}
+.filters .count{margin-left:auto; font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.link{color:var(--blue-ink); font-size:12.5px; font-weight:500; border-radius:6px; padding:2px 4px; transition:background .14s}
+.link:hover{background:var(--blue-soft)}
+
+/* ══ inspector ══════════════════════════════════════ */
+.insp{position:sticky; top:0; align-self:start; max-height:calc(100vh - 110px); display:flex; flex-direction:column}
+.insp .panel-body{overflow-y:auto}
+.insp-id{padding:14px 16px 13px; border-bottom:1px solid var(--line)}
+.insp-id .t{display:flex; align-items:center; gap:9px}
+.insp-id h3{font-family:var(--mono); font-size:15px; font-weight:500; letter-spacing:-0.03em}
+.insp-id .m{font-size:12px; color:var(--ink-3); margin-top:4px}
+.verdict{padding:13px 16px; border-bottom:1px solid var(--line); background:var(--panel-2); font-size:13px; line-height:1.6}
+.verdict b{font-weight:600}
+.blk + .blk{margin-top:16px; padding-top:15px; border-top:1px solid var(--line)}
+.blk-t{font-size:12px; font-weight:600; color:var(--ink-3); margin-bottom:10px; display:flex; align-items:center; gap:8px}
+.blk-t .v{margin-left:auto; font-size:12.5px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.sbar{display:flex; height:26px; border-radius:var(--r-pill); overflow:hidden; background:var(--panel-3)}
+.sbar div{transition:width .45s var(--ease)}
+.s1{background:var(--blue)} .s2{background:#4A8FE8} .s3{background:#84B4F0} .s4{background:var(--blue-mid)}
+.skey{display:grid; gap:5px; margin-top:11px}
+.skey .r{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-2)}
+.skey i{width:9px; height:9px; border-radius:var(--r-pill); flex:none}
+.skey b{margin-left:auto; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.skey em{font-style:normal; color:var(--ink-3); font-size:11.5px; font-variant-numeric:tabular-nums}
+.calc{font-size:12.5px; line-height:1.95; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.calc .r{display:flex; justify-content:space-between; gap:10px}
+.calc .r span:last-child{font-family:var(--mono); font-size:11.5px; color:var(--ink)}
+.calc .r.tot{border-top:1px solid var(--line); margin-top:5px; padding-top:6px; color:var(--ink); font-weight:500}
+.calc .r.tot span:last-child{color:var(--green); font-weight:500}
+.checks{display:grid; gap:9px}
+.chk{display:grid; grid-template-columns:15px 1fr; gap:9px; font-size:12.5px; color:var(--ink-2); line-height:1.55}
+.chk svg{margin-top:2px}
+.chk b{color:var(--ink); font-weight:600}
+.move{display:grid; grid-template-columns:1fr 18px 1fr; gap:9px; align-items:stretch}
+.slot{border-radius:var(--r-md); padding:10px 12px; background:var(--panel-3)}
+.slot.to{background:var(--green-soft)}
+.slot .l{font-size:11.5px; font-weight:600; color:var(--ink-3); margin-bottom:5px}
+.slot.to .l{color:var(--green)}
+.slot .z{font-size:13px; font-weight:600; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.slot .c{font-family:var(--mono); font-size:11px; color:var(--ink-2); line-height:1.65}
+.movearrow{align-self:center; color:var(--ink-3)}
+.empty{padding:40px 16px; text-align:center; color:var(--ink-3); font-size:12.5px}
+.empty svg{margin-bottom:10px; color:var(--line-2)}
+
+/* diagnóstico */
+.diag{display:grid}
+.diag li{display:grid; grid-template-columns:17px 1fr auto; gap:10px; align-items:start; padding:11px 0; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-2); line-height:1.55}
+.diag li:first-child{border-top:0; padding-top:2px}
+.diag b{color:var(--ink); font-weight:600}
+.diag .st{font-size:11.5px; font-weight:600; padding:1px 9px; border-radius:var(--r-pill)}
+.st-ok{color:var(--green); background:var(--green-soft)}
+.st-warn{color:var(--amber); background:var(--amber-soft)}
+.st-info{color:var(--ink-3); background:var(--panel-3)}
+
+/* gemelo */
+.pipe{width:100%; height:auto; display:block}
+.heatgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:9px}
+.htile{border-radius:var(--r-md); padding:10px 12px; background:var(--panel-3)}
+.htile .n{font-size:12px; font-weight:600; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.htile .s{font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums; margin-top:2px}
+.htile .b{height:4px; border-radius:99px; margin-top:8px; background:#E1E1E8; overflow:hidden}
+.htile .b i{display:block; height:100%; border-radius:99px}
+pre.code{margin:0; padding:13px 15px; font-family:var(--mono); font-size:11.5px; line-height:1.8; overflow-x:auto; color:var(--ink-2); background:var(--panel-2); border-radius:var(--r-md)}
+pre.code .k{color:var(--blue-ink)} pre.code .v{color:var(--ink)} pre.code .c{color:var(--ink-3)}
+.steps{display:grid}
+.step{display:grid; grid-template-columns:10px 1fr; gap:11px; padding:11px 0; border-top:1px solid var(--line)}
+.step:first-child{border-top:0; padding-top:0}
+.step i{width:8px; height:8px; border-radius:99px; background:var(--blue); margin-top:6px}
+.step.next i{background:transparent; box-shadow:inset 0 0 0 1.5px var(--line-2)}
+.step h4{font-size:12.5px; font-weight:600; margin-bottom:3px}
+.step p{font-size:12px; color:var(--ink-2); line-height:1.55}
+.step .w{font-size:11px; font-weight:600; color:var(--blue-ink); background:var(--blue-soft); padding:1px 8px; border-radius:var(--r-pill); margin-left:7px; vertical-align:1px}
+.step.next .w{color:var(--ink-3); background:var(--panel-3)}
+.log{font-family:var(--mono); font-size:11.5px; color:var(--ink-2); display:grid; gap:6px; max-height:150px; overflow-y:auto}
+.log div{display:flex; gap:11px}
+.log time{color:var(--ink-3); flex:none}
+.assump{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px}
+.assump h4{font-size:12.5px; font-weight:600; margin-bottom:8px; color:var(--ink)}
+.assump li{font-size:12.5px; color:var(--ink-2); line-height:1.6; padding-left:14px; position:relative; margin-bottom:5px}
+.assump li::before{content:""; position:absolute; left:2px; top:9px; width:5px; height:5px; border-radius:99px; background:var(--line-2)}
+
+.toast{
+  position:fixed; right:18px; bottom:42px; z-index:60; display:flex; align-items:center; gap:10px;
+  padding:11px 16px; border-radius:var(--r-md); background:#1E2027; color:#EEEFF2; font-size:12.5px;
+  box-shadow:var(--shadow-lift);
+  opacity:0; transform:translateY(8px); pointer-events:none; transition:opacity .28s var(--ease), transform .28s var(--ease);
+}
+.toast[data-show="true"]{opacity:1; transform:translateY(0)}
+.toast .mono{color:#9298A3; font-size:11px}
+
+@media (max-width:1240px){
+  .grid-main{grid-template-columns:minmax(0,1fr)}
+  .insp{position:static; max-height:none}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  body{overflow:auto}
+  .app{grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr 30px; height:auto}
+  .rail{grid-row:1/2; flex-direction:row; align-items:center; overflow-x:auto}
+  .rail-brand{flex:none}
+  .rail-sec,.rail-foot{display:none}
+  nav{grid-auto-flow:column; gap:3px; padding:8px}
+  .nav-item{white-space:nowrap} .nav-count{display:none}
+  .frame{grid-row:2/3} .statusbar{grid-column:1/2; grid-row:3/4}
+  .work{overflow:visible}
+  .grid-2,.assump{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .topbar{height:auto; padding:12px; flex-wrap:wrap}
+  .tb-right{margin-left:0; width:100%; flex-wrap:wrap}
+  .field input{width:64px}
+  .tablewrap.scroll{max-height:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important; transition-duration:.001ms !important}}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="rail-brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="17" height="17" rx="3.5" stroke="#4A505B"/>
+        <rect x="4.6" y="4.6" width="4.4" height="4.4" rx="1" fill="#8CBBAA"/>
+        <rect x="11" y="4.6" width="4.4" height="4.4" rx="1" fill="#3D434E"/>
+        <rect x="4.6" y="11" width="4.4" height="4.4" rx="1" fill="#3D434E"/>
+        <rect x="11" y="11" width="4.4" height="4.4" rx="1" fill="#3D434E"/>
+      </svg>
+      <div><b>TwinSlot</b><span>CD Inchcape · Lima</span></div>
+    </div>
+    <div class="rail-sec lbl" style="color:#6B727E">Operación</div>
+    <nav id="nav">
+      <button type="button" class="nav-item" data-view="resumen" aria-current="page">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+        Resumen</button>
+      <button type="button" class="nav-item" data-view="plan">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 4h10M3 8h10M3 12h6"/></svg>
+        Plan de movimientos <span class="nav-count">20</span></button>
+      <button type="button" class="nav-item" data-view="catalogo">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.2" y="2.2" width="11.6" height="11.6" rx="1.6"/><path d="M2.2 6h11.6M6 6v7.8"/></svg>
+        Catálogo <span class="nav-count">100</span></button>
+      <button type="button" class="nav-item" data-view="zonas">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M8 1.8 14 5v6l-6 3.2L2 11V5z"/><path d="M2 5l6 3.2L14 5M8 8.2v6"/></svg>
+        Zonas <span class="nav-count">8</span></button>
+      <button type="button" class="nav-item" data-view="gemelo">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M13.6 8a5.6 5.6 0 0 1-9.5 4M2.4 8a5.6 5.6 0 0 1 9.5-4"/><path d="M11.6 1.9v2.3H9.4M4.4 14.1v-2.3h2.2"/></svg>
+        Gemelo digital</button>
+    </nav>
+    <div class="rail-foot">
+      <div class="r"><span>Solver</span><b>CBC · Óptimo</b></div>
+      <div class="r"><span>Corrida</span><b class="mono">#0042</b></div>
+      <div class="r"><span>Gemelo</span><b><span class="dot-ok"></span>sincronizado</b></div>
+    </div>
+  </aside>
+
+  <div class="frame">
+    <div class="topbar">
+      <div class="crumb">
+        <h1 id="view-title">Resumen operativo</h1>
+        <p id="view-sub">Muestra de 100 SKU · corrida de hoy 06:12</p>
+      </div>
+      <div class="tb-right">
+        <div class="field">
+          <label for="tarifa">Tarifa USD/h-h</label>
+          <input id="tarifa" type="number" min="0" step="0.5" value="6" inputmode="decimal">
+        </div>
+        <div class="seg" role="group" aria-label="Alcance de las cifras">
+          <button type="button" data-scope="muestra" aria-pressed="true">Muestra</button>
+          <button type="button" data-scope="cd" aria-pressed="false">CD proyectado</button>
+        </div>
+        <button type="button" class="btn btn-primary" id="sync" data-state="idle">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13.6 8a5.6 5.6 0 0 1-9.5 4M2.4 8a5.6 5.6 0 0 1 9.5-4"/><path d="M11.6 1.9v2.3H9.4M4.4 14.1v-2.3h2.2"/></svg>
+          <span id="sync-label">Publicar al gemelo</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="work" id="work">
+
+      <!-- ══ RESUMEN ══════════════════════════════ -->
+      <div class="view" data-view="resumen" data-active="true">
+        <div class="kpis" id="kpis"></div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Carga de picking por zona</h2>
+              <span class="sub">horas-hombre al año</span>
+              <div class="right"><button type="button" class="link" data-goto="zonas">Ver zonas</button></div>
+            </div>
+            <div class="tablewrap">
+              <table class="data" id="t-resumen-zonas">
+                <thead><tr>
+                  <th>Zona</th><th class="n">min</th>
+                  <th style="width:46%">Carga · liberable</th><th class="n">Horas</th><th class="n">Plan</th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Diagnóstico de la corrida</h2><span class="sub" id="diag-count"></span></div>
+            <div class="panel-body"><ul class="diag" id="diag"></ul></div>
+          </div>
+        </div>
+
+        <details class="panel disclose" style="margin-top:14px">
+          <summary class="panel-head"><h2>Qué sostiene estas cifras</h2><span class="sub">medido, supuesto y pendiente</span><span class="chev"></span></summary>
+          <div class="panel-body">
+            <div class="assump">
+              <div><h4>Medido</h4><ul>
+                <li>100 SKU del maestro con rotación de 6 meses y ubicación actual.</li>
+                <li>Tiempos y distancias por zona tomados del layout del CD.</li>
+                <li>Solución CBC en estado Óptimo; capacidad por zona verificada.</li>
+              </ul></div>
+              <div><h4>Supuesto</h4><ul>
+                <li>Tarifa de <b id="as-tarifa">USD 6.00</b> por hora-hombre, con cargas incluidas.</li>
+                <li>Costo del traslado en sí = 0; falta el costo real de la cuadrilla.</li>
+                <li>Frecuencia de visita aproximada por la rotación de 6 meses.</li>
+              </ul></div>
+              <div><h4>Pendiente</h4><ul>
+                <li>Capacidad por ubicación, no solo agregada por zona.</li>
+                <li>Compatibilidad física SKU–zona y reglas ergonómicas.</li>
+                <li>Desglose de pasillos en PISO, LLANTAS, RECIBO, LATERALES y COLGANTES.</li>
+              </ul></div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- ══ PLAN ═════════════════════════════════ -->
+      <div class="view" data-view="plan">
+        <div class="grid-main">
+          <div class="panel">
+            <div class="filters">
+              <div class="search">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.2" cy="6.2" r="4.2"/><path d="M9.4 9.4 12 12" stroke-linecap="round"/></svg>
+                <input type="search" id="q-plan" placeholder="SKU, marca o familia" aria-label="Buscar en el plan">
+              </div>
+              <select class="sel" id="f-plan-zona" aria-label="Filtrar por zona origen"><option value="">Todas las zonas origen</option></select>
+              <span class="count" id="c-plan"></span>
+            </div>
+            <div class="tablewrap scroll">
+              <table class="data" id="t-plan">
+                <thead><tr>
+                  <th class="sortable" data-k="sku">SKU<span class="caret">↑</span></th>
+                  <th>Producto</th>
+                  <th class="sortable" data-k="abc">Clase<span class="caret">↑</span></th>
+                  <th>Traslado</th>
+                  <th class="sortable n" data-k="ahorro">h-h/año<span class="caret">↑</span></th>
+                  <th class="sortable n" data-k="usd">USD/año<span class="caret">↑</span></th>
+                  <th>Equipo</th>
+                </tr></thead>
+                <tbody></tbody>
+                <tfoot><tr id="f-plan"></tr></tfoot>
+              </table>
+            </div>
+          </div>
+          <div class="panel insp" id="insp-plan"></div>
+        </div>
+      </div>
+
+      <!-- ══ CATÁLOGO ═════════════════════════════ -->
+      <div class="view" data-view="catalogo">
+        <div class="grid-main">
+          <div class="panel">
+            <div class="filters">
+              <div class="search">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.2" cy="6.2" r="4.2"/><path d="M9.4 9.4 12 12" stroke-linecap="round"/></svg>
+                <input type="search" id="q-cat" placeholder="SKU, marca o familia" aria-label="Buscar en el catálogo">
+              </div>
+              <select class="sel" id="f-cat-zona" aria-label="Filtrar por zona"><option value="">Todas las zonas</option></select>
+              <select class="sel" id="f-cat-acc" aria-label="Filtrar por acción"><option value="">Toda acción</option><option value="1">Solo MOVER</option><option value="0">Solo MANTENER</option></select>
+              <span class="count" id="c-cat"></span>
+            </div>
+            <div class="tablewrap scroll">
+              <table class="data" id="t-cat">
+                <thead><tr>
+                  <th class="sortable" data-k="sku">SKU<span class="caret">↑</span></th>
+                  <th>Producto</th>
+                  <th class="sortable" data-k="abc">Clase<span class="caret">↑</span></th>
+                  <th class="sortable n" data-k="rot">Rot 6M<span class="caret">↑</span></th>
+                  <th class="sortable" data-k="zona">Zona actual<span class="caret">↑</span></th>
+                  <th class="sortable n" data-k="costo">Carga h<span class="caret">↑</span></th>
+                  <th class="sortable" data-k="mover">Acción<span class="caret">↑</span></th>
+                </tr></thead>
+                <tbody></tbody>
+                <tfoot><tr id="f-cat"></tr></tfoot>
+              </table>
+            </div>
+          </div>
+          <div class="panel insp" id="insp-cat"></div>
+        </div>
+      </div>
+
+      <!-- ══ ZONAS ════════════════════════════════ -->
+      <div class="view" data-view="zonas">
+        <div class="grid-main">
+          <div class="stack">
+            <div class="panel">
+              <div class="panel-head"><h2>Zonas del centro de distribución</h2><span class="sub">8 activas en la muestra · 16 subzonas mapeadas</span></div>
+              <div class="tablewrap">
+                <table class="data" id="t-zonas">
+                  <thead><tr>
+                    <th class="sortable" data-k="z">Zona<span class="caret">↑</span></th>
+                    <th class="sortable n" data-k="t">min<span class="caret">↑</span></th>
+                    <th class="sortable n" data-k="n">SKU<span class="caret">↑</span></th>
+                    <th class="sortable n" data-k="carga">Carga h<span class="caret">↑</span></th>
+                    <th style="width:30%">Carga · liberable</th>
+                    <th class="sortable n" data-k="mov">Plan<span class="caret">↑</span></th>
+                  </tr></thead>
+                  <tbody></tbody>
+                  <tfoot><tr id="f-zonas"></tr></tfoot>
+                </table>
+              </div>
+            </div>
+
+            <details class="panel disclose">
+              <summary class="panel-head">
+                <h2>Plano por subzona</h2>
+                <span class="sub">18 declaraciones · capacidad y ocupación</span>
+                <span class="chev"></span>
+              </summary>
+              <div class="tablewrap">
+                <table class="data" id="t-plano">
+                  <thead><tr>
+                    <th>Zona</th><th>Subzona</th><th class="n">Capacidad</th>
+                    <th>Operación</th><th class="n">SKU muestra</th><th>Estado del dato</th>
+                  </tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div style="padding:0 18px 16px; font-size:12.5px; color:var(--ink-3)">MEZANNINE y RACK BALDA comparten el mismo pool físico de estanterías.</div>
+            </details>
+          </div>
+          <div class="panel insp" id="insp-zona"></div>
+        </div>
+      </div>
+
+      <!-- ══ GEMELO ═══════════════════════════════ -->
+      <div class="view" data-view="gemelo">
+        <div class="grid-2">
+          <div class="stack">
+            <div class="panel">
+              <div class="panel-head"><h2>Cadena de datos</h2><span class="sub">motor → gemelo</span></div>
+              <div class="panel-body">
+                <svg class="pipe" viewBox="0 0 700 210" role="img" aria-label="Cadena de datos desde el Excel del CD hasta el visor 3D del gemelo digital">
+                  <defs>
+                    <marker id="ar" viewBox="0 0 8 8" refX="6.4" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 6.4 4 1 7" fill="none" stroke="#6C737E" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></marker>
+                    <marker id="arb" viewBox="0 0 8 8" refX="6.4" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 6.4 4 1 7" fill="none" stroke="#1F3FB8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker>
+                  </defs>
+                  <g font-family="DM Sans, -apple-system, SF Pro Text, system-ui, sans-serif">
+                    <rect x="4" y="24" width="132" height="50" rx="10" fill="#F7F8F9" stroke="#DFE1E6"/>
+                    <text x="18" y="45" font-size="11.5" font-weight="600" fill="#101318">Excel del CD</text>
+                    <text x="18" y="61" font-size="10.5" fill="#6C737E" font-family="DM Mono, SF Mono, ui-monospace, monospace">6 hojas · 100 SKU</text>
+                    <line x1="142" y1="49" x2="172" y2="49" stroke="#6C737E" stroke-width="1.1" marker-end="url(#ar)"/>
+                    <rect x="178" y="24" width="140" height="50" rx="10" fill="#F7F8F9" stroke="#DFE1E6"/>
+                    <text x="192" y="45" font-size="11.5" font-weight="600" fill="#101318">Base maestra</text>
+                    <text x="192" y="61" font-size="10.5" fill="#6C737E" font-family="DM Mono, SF Mono, ui-monospace, monospace">carga · ahorro · ABC</text>
+                    <line x1="324" y1="49" x2="354" y2="49" stroke="#6C737E" stroke-width="1.1" marker-end="url(#ar)"/>
+                    <rect x="360" y="24" width="140" height="50" rx="10" fill="#F7F8F9" stroke="#DFE1E6"/>
+                    <text x="374" y="45" font-size="11.5" font-weight="600" fill="#101318">Score multicriterio</text>
+                    <text x="374" y="61" font-size="10.5" fill="#6C737E" font-family="DM Mono, SF Mono, ui-monospace, monospace">55/20/10/15</text>
+                    <line x1="506" y1="49" x2="536" y2="49" stroke="#6C737E" stroke-width="1.1" marker-end="url(#ar)"/>
+                    <rect x="542" y="24" width="126" height="50" rx="10" fill="#E8EBFA" stroke="#A9B4E8"/>
+                    <text x="556" y="45" font-size="11.5" font-weight="600" fill="#1F3FB8">Optimizador</text>
+                    <text x="556" y="61" font-size="10.5" fill="#1F3FB8" font-family="DM Mono, SF Mono, ui-monospace, monospace">PuLP · CBC</text>
+                    <path d="M605 80 L605 100 Q605 106 599 106 L76 106 Q70 106 70 112 L70 128" fill="none" stroke="#1F3FB8" stroke-width="1.1" marker-end="url(#arb)"/>
+                    <text x="340" y="100" font-size="10" fill="#6C737E" text-anchor="middle">asignación x(i,z)</text>
+                    <rect x="4" y="134" width="146" height="50" rx="10" fill="#E8EBFA" stroke="#A9B4E8"/>
+                    <text x="18" y="155" font-size="11.5" font-weight="600" fill="#1F3FB8">Asignador de slots</text>
+                    <text x="18" y="171" font-size="10.5" fill="#1F3FB8" font-family="DM Mono, SF Mono, ui-monospace, monospace">pasillo·posición·nivel</text>
+                    <line x1="156" y1="159" x2="186" y2="159" stroke="#6C737E" stroke-width="1.1" marker-end="url(#ar)"/>
+                    <rect x="192" y="134" width="164" height="50" rx="10" fill="#F7F8F9" stroke="#DFE1E6"/>
+                    <text x="206" y="155" font-size="11.5" font-weight="600" fill="#101318">digital_twin_data.json</text>
+                    <text x="206" y="171" font-size="10.5" fill="#6C737E" font-family="DM Mono, SF Mono, ui-monospace, monospace">100 registros · 64 KB</text>
+                    <line x1="362" y1="159" x2="392" y2="159" stroke="#6C737E" stroke-width="1.1" marker-end="url(#ar)"/>
+                    <rect x="398" y="134" width="150" height="50" rx="10" fill="#E1EDE8" stroke="#8CBBAA"/>
+                    <text x="412" y="155" font-size="11.5" font-weight="600" fill="#12604A">Visor 3D del gemelo</text>
+                    <text x="412" y="171" font-size="10.5" fill="#12604A" font-family="DM Mono, SF Mono, ui-monospace, monospace">heat 136.6–5,459.2</text>
+                    <line x1="554" y1="159" x2="584" y2="159" stroke="#6C737E" stroke-width="1.1" marker-end="url(#ar)"/>
+                    <text x="592" y="155" font-size="10.5" fill="#6C737E">Operaciones</text>
+                    <text x="592" y="170" font-size="10.5" fill="#6C737E">valida y ejecuta</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h2>Contrato de datos</h2><span class="sub">1 registro por SKU</span></div>
+              <div class="panel-body">
+<pre class="code"><span class="c">// lo que el motor entrega al gemelo</span>
+{
+  <span class="k">"sku"</span>: <span class="v">"SKU00078"</span>,
+  <span class="k">"subzona"</span>: <span class="v">"Rack Neumáticos"</span>,
+  <span class="k">"pasillo_x"</span>: <span class="v">0</span>, <span class="k">"posicion_y"</span>: <span class="v">6</span>, <span class="k">"nivel_z"</span>: <span class="v">3</span>,
+  <span class="k">"operacion"</span>: <span class="v">"Reach"</span>,
+  <span class="k">"requiere_grua"</span>: <span class="v">true</span>,
+  <span class="k">"multiplicador_tiempo"</span>: <span class="v">1.4</span>,
+  <span class="k">"heat_tiempo_picking"</span>: <span class="v">5459.2</span>,
+  <span class="k">"color_heat"</span>: <span class="v">"#F09595"</span>
+}</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="panel">
+              <div class="panel-head"><h2>Sincronización</h2><span class="sub" id="sync-when">hace 4 min</span></div>
+              <div class="panel-body">
+                <div class="steps">
+                  <div class="step"><i></i><div><h4>Corrida por lote<span class="w">hoy</span></h4><p>Operaciones sube el Excel, el motor resuelve y exporta el JSON. El visor lo lee al abrir: una foto por corrida.</p></div></div>
+                  <div class="step"><i></i><div><h4>Coordenada física, no solo zona<span class="w">hoy</span></h4><p>El asignador convierte la zona que decide el modelo en pasillo, posición y nivel, y penaliza ×1.4 los niveles con grúa.</p></div></div>
+                  <div class="step next"><i></i><div><h4>Escenarios lado a lado<span class="w">siguiente</span></h4><p>El gemelo carga dos estados —actual y propuesto— y anima los 20 traslados sobre el plano antes de tocar el almacén.</p></div></div>
+                  <div class="step next"><i></i><div><h4>Enlace con el WMS<span class="w">siguiente</span></h4><p>Las líneas de pedido reales reemplazan la rotación de 6 meses; el motor recorre por turno y el heat deja de ser una foto.</p></div></div>
+                </div>
+                <div class="blk"><div class="blk-t">Registro de publicaciones</div>
+                  <div class="log" id="log"></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h2>Heat por subzona</h2><span class="sub">min de picking anualizados</span></div>
+              <div class="panel-body"><div class="heatgrid" id="heatgrid"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span><b id="sb-skus">100</b> SKU en <b>8</b> zonas</span>
+    <span><b>800</b> escenarios · tope de <b>20</b> traslados</span>
+    <span id="sb-sel">Sin selección</span>
+    <span>Corrida <b class="mono">#0042</b> · hoy 06:12</span>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#8CBBAA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.6 8.2 6.2 11.8 13.4 4.6"/></svg>
+  <span>Escenario publicado al gemelo</span><span class="mono">100 SKU · 20 traslados</span>
+</div>
+
+<script id="engine-data" type="application/json">/*__DATA__*/</script>
+<script>
+(() => {
+const D = JSON.parse(document.getElementById('engine-data').textContent);
+const TMIN = D.meta.tmin, ZMIN = D.meta.zmin, W = D.meta.pesos, FACTOR = 100;
+const SK = D.skus, MOV = SK.filter(s => s.mover);
+const totalMin = SK.reduce((a, s) => a + s.costo, 0);
+const ahorroMin = MOV.reduce((a, s) => a + s.ahorro, 0);
+let tarifa = 6, scope = 'muestra';
+
+const h = m => m / 60;
+const nf = (v, d = 0) => (v ?? 0).toLocaleString('es-PE', {minimumFractionDigits: d, maximumFractionDigits: d});
+const usd = v => 'USD ' + nf(Math.round(v));
+const zl = z => z.replace(/^\d+\.\s*/, '');
+const opl = o => o === 'Grua' ? 'Grúa' : o === 'Estatico' ? 'Estático' : o;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = s => document.querySelector(s);
+SK.forEach((s, i) => { s.rankAhorro = i + 1; s.dt = +(s.t - TMIN).toFixed(2); });
+
+const ICON = {
+  ok: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#12604A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 7.3 5.6 10.3 11.4 3.9"/></svg>',
+  warn: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#8A5900" stroke-width="1.7" stroke-linecap="round"><path d="M7 3v4.4M7 10.2v.2"/></svg>',
+  info: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6C737E" stroke-width="1.7" stroke-linecap="round"><path d="M7 6.4V10M7 3.8v.2"/></svg>',
+  grua: '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#8A5900" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:5px;vertical-align:-1px"><path d="M1.6 2.2h8.8M3.4 2.2v7.6M3.4 9.8h5"/><path d="M8.4 2.2v3.2"/></svg>'
+};
+
+/* ══ navegación ══════════════════════════════════ */
+const TITLES = {
+  resumen: ['Resumen operativo', 'Muestra de 100 SKU · corrida de hoy 06:12'],
+  plan: ['Plan de movimientos', '20 traslados autorizados · selecciona una fila para ver la decisión'],
+  catalogo: ['Catálogo de SKU', '100 productos modelados · mover y mantener'],
+  zonas: ['Zonas y subzonas', '8 zonas activas · 16 subzonas del plano'],
+  gemelo: ['Gemelo digital', 'Contrato de datos, sincronización y heat por subzona']
+};
+function go(v) {
+  document.querySelectorAll('.nav-item').forEach(b => b.setAttribute('aria-current', b.dataset.view === v ? 'page' : 'false'));
+  document.querySelectorAll('.view').forEach(el => el.dataset.active = String(el.dataset.view === v));
+  $('#view-title').textContent = TITLES[v][0];
+  $('#view-sub').textContent = TITLES[v][1];
+  $('#work').scrollTop = 0;
+}
+document.getElementById('nav').addEventListener('click', e => {
+  const b = e.target.closest('.nav-item'); if (b) go(b.dataset.view);
+});
+document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => go(b.dataset.goto)));
+
+/* ══ KPIs ════════════════════════════════════════ */
+function kpis() {
+  const f = scope === 'cd' ? FACTOR : 1;
+  const hh = h(ahorroMin) * f, hoy = h(totalMin) * f, pct = 100 * ahorroMin / totalMin;
+  const proj = scope === 'cd';
+  const cells = [
+    ['Carga de picking hoy', nf(hoy) + ' <small>h-h/año</small>', `equivale a ${usd(hoy * tarifa)} de mano de obra`, 0, false],
+    ['Horas que libera el plan', nf(hh) + ' <small>h-h/año</small>', `−${nf(pct, 1)} % · quedan ${nf(hoy - hh)} h-h`, pct, true],
+    ['Retorno anual', usd(hh * tarifa), proj ? 'proyección lineal ×100 del catálogo' : `20 traslados · a ${usd(tarifa)} por h-h`, 0, true]
+  ];
+  $('#kpis').innerHTML = cells.map(c => `<div class="kpi${c[4] ? ' is-gain' : ''}">
+    <div class="k">${c[0]}</div><div class="v">${c[1]}</div><div class="d">${c[2]}</div>
+    ${c[3] ? `<div class="trend"><i style="width:${Math.min(100, c[3])}%"></i></div>` : ''}</div>`).join('');
+  $('#as-tarifa').textContent = 'USD ' + tarifa.toFixed(2);
+}
+
+/* ══ resumen: zonas + diagnóstico ════════════════ */
+const maxCarga = Math.max(...D.zonas.map(z => z.carga));
+function resumenZonas() {
+  $('#t-resumen-zonas').tBodies[0].innerHTML = D.zonas.map(z => {
+    const w = 100 * z.carga / maxCarga, g = z.carga ? 100 * z.pot / z.carga : 0;
+    return `<tr><td>${esc(zl(z.z))}</td><td class="n dim">${nf(z.t, 2)}</td>
+      <td><div class="cellbar"><div class="tr"><div class="fl" style="width:${w}%">
+        <div class="keep" style="width:${100 - g}%"></div><div class="gainf" style="width:${g}%"></div></div></div>
+        <span class="pct">${nf(g)} %</span></div></td>
+      <td class="n">${nf(h(z.carga))}</td>
+      <td class="n">${z.mov ? `<span class="tag tag-mover">${z.mov}</span>` : '<span class="dim">—</span>'}</td></tr>`;
+  }).join('');
+}
+function diag() {
+  const items = [
+    ['ok', 'Restricciones del modelo', 'Capacidad por zona y tope de 20 traslados: ambos se cumplen.'],
+    ['warn', 'Todo va a una sola zona', 'Los 20 traslados aterrizan en PISO. Falta capacidad por ubicación para repartirlos.'],
+    ['warn', 'Nueve traslados con grúa', 'Están en niveles altos y su tiempo real corre ×1.4. El plan los baja a nivel 1.'],
+    ['info', 'La muestra es el 1 % del CD', 'Cualquier cifra proyectada al almacén completo es estimada.']
+  ];
+  $('#diag').innerHTML = items.map(([st, t, d]) =>
+    `<li>${ICON[st]}<span><b>${t}.</b> ${d}</span><span class="st st-${st === 'ok' ? 'ok' : st === 'warn' ? 'warn' : 'info'}">${st === 'ok' ? 'OK' : st === 'warn' ? 'Revisar' : 'Nota'}</span></li>`).join('');
+  $('#diag-count').textContent = '2 por revisar';
+}
+/* ══ tabla genérica con orden ════════════════════ */
+function sorter(tableSel, state, redraw) {
+  document.querySelectorAll(tableSel + ' th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      if (state.k === k) state.dir *= -1; else { state.k = k; state.dir = -1; }
+      document.querySelectorAll(tableSel + ' th').forEach(o => o.removeAttribute('aria-sort'));
+      th.setAttribute('aria-sort', state.dir === -1 ? 'descending' : 'ascending');
+      th.querySelector('.caret').textContent = state.dir === -1 ? '↓' : '↑';
+      redraw();
+    });
+  });
+}
+const cmp = (a, b, k, dir) => {
+  const x = a[k], y = b[k];
+  if (typeof x === 'string') return dir * (x < y ? -1 : x > y ? 1 : 0) * -1;
+  return dir * ((x - y) * -1) * -1;
+};
+const sortRows = (rows, st) => st.k ? [...rows].sort((a, b) => {
+  const x = a[st.k], y = b[st.k];
+  const r = typeof x === 'string' ? (x > y ? 1 : x < y ? -1 : 0) : (x - y);
+  return st.dir === -1 ? -r : r;
+}) : rows;
+
+/* ══ PLAN ════════════════════════════════════════ */
+const stPlan = {k: 'ahorro', dir: -1};
+let selPlan = MOV[0].sku;
+function planRows() {
+  const q = $('#q-plan').value.trim().toLowerCase();
+  const fz = $('#f-plan-zona').value;
+  return sortRows(MOV.filter(s =>
+    (!q || (s.sku + s.marca + s.fam).toLowerCase().includes(q)) && (!fz || s.zona === fz)
+  ).map(s => ({...s, usd: h(s.ahorro) * tarifa})), stPlan);
+}
+function drawPlan() {
+  const rows = planRows();
+  $('#t-plan').tBodies[0].innerHTML = rows.length ? rows.map(s => `
+    <tr class="pick" data-sku="${s.sku}" tabindex="0" role="button" aria-selected="${s.sku === selPlan}">
+      <td class="sku">${s.sku}</td>
+      <td>${esc(s.marca)} <span class="dim">· ${esc(s.fam)}</span></td>
+      <td><span class="tag tag-${s.abc}">${s.abc}</span></td>
+      <td>${esc(zl(s.zona))}<span class="arrow">→</span><b style="font-weight:500">${esc(zl(ZMIN))}</b></td>
+      <td class="n gain">${nf(h(s.ahorro), 1)}</td>
+      <td class="n">${nf(Math.round(s.usd))}</td>
+      <td>${s.grua ? '<span class="tag tag-grua">Grúa</span>' : '<span class="dim">Manual</span>'}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="7"><div class="empty">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21" stroke-linecap="round"/></svg>
+        <div>Ningún traslado coincide con los filtros.</div></div></td></tr>`;
+  const th = rows.reduce((a, s) => a + h(s.ahorro), 0);
+  $('#f-plan').innerHTML = `<td colspan="4">${rows.length} de ${MOV.length} traslados</td>
+    <td class="n gain">${nf(th, 1)}</td><td class="n">${nf(Math.round(th * tarifa))}</td><td></td>`;
+  $('#c-plan').textContent = `${rows.length} / ${MOV.length}`;
+}
+sorter('#t-plan', stPlan, drawPlan);
+['#q-plan', '#f-plan-zona'].forEach(s =>
+  $(s).addEventListener('input', drawPlan));
+$('#t-plan').addEventListener('click', e => { const tr = e.target.closest('tr[data-sku]'); if (tr) pick(tr.dataset.sku, 'plan'); });
+$('#t-plan').addEventListener('keydown', e => {
+  const tr = e.target.closest('tr[data-sku]'); if (!tr) return;
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(tr.dataset.sku, 'plan'); }
+});
+
+/* ══ CATÁLOGO ════════════════════════════════════ */
+const stCat = {k: 'costo', dir: -1};
+let selCat = SK[0].sku;
+function catRows() {
+  const q = $('#q-cat').value.trim().toLowerCase();
+  const fz = $('#f-cat-zona').value, fc = $('#f-cat-acc').value;
+  return sortRows(SK.filter(s =>
+    (!q || (s.sku + s.marca + s.fam).toLowerCase().includes(q)) &&
+    (!fz || s.zona === fz) && (fc === '' || String(+s.mover) === fc)
+  ), stCat);
+}
+function drawCat() {
+  const rows = catRows();
+  $('#t-cat').tBodies[0].innerHTML = rows.length ? rows.map(s => `
+    <tr class="pick" data-sku="${s.sku}" tabindex="0" role="button" aria-selected="${s.sku === selCat}">
+      <td class="sku">${s.sku}</td>
+      <td>${esc(s.marca)} <span class="dim">· ${esc(s.fam)}</span></td>
+      <td><span class="tag tag-${s.abc}">${s.abc}</span></td>
+      <td class="n">${nf(s.rot)}</td>
+      <td>${esc(zl(s.zona))}${s.grua ? ICON.grua : ''}</td>
+      <td class="n">${nf(h(s.costo), 1)}</td>
+      <td><span class="tag ${s.mover ? 'tag-mover' : 'tag-hold'}">${s.mover ? 'Mover' : 'Mantener'}</span></td>
+    </tr>`).join('')
+    : `<tr><td colspan="7"><div class="empty">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21" stroke-linecap="round"/></svg>
+        <div>Ningún SKU coincide con los filtros.</div></div></td></tr>`;
+  const tc = rows.reduce((a, s) => a + h(s.costo), 0);
+  $('#f-cat').innerHTML = `<td colspan="5">${rows.length} de ${SK.length} SKU</td>
+    <td class="n">${nf(tc)}</td><td>${rows.filter(s => s.mover).length} a mover</td>`;
+  $('#c-cat').textContent = `${rows.length} / ${SK.length}`;
+}
+sorter('#t-cat', stCat, drawCat);
+['#q-cat', '#f-cat-zona', '#f-cat-acc'].forEach(s =>
+  $(s).addEventListener('input', drawCat));
+$('#t-cat').addEventListener('click', e => { const tr = e.target.closest('tr[data-sku]'); if (tr) pick(tr.dataset.sku, 'cat'); });
+$('#t-cat').addEventListener('keydown', e => {
+  const tr = e.target.closest('tr[data-sku]'); if (!tr) return;
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(tr.dataset.sku, 'cat'); }
+});
+
+/* ══ inspector de SKU ════════════════════════════ */
+function pick(sku, where) {
+  if (where === 'plan') { selPlan = sku; drawPlan(); } else { selCat = sku; drawCat(); }
+  inspect(sku, where === 'plan' ? '#insp-plan' : '#insp-cat');
+  $('#sb-sel').innerHTML = `Selección <b class="mono">${sku}</b>`;
+}
+function inspect(sku, target) {
+  const s = SK.find(x => x.sku === sku);
+  const parts = [
+    ['Ahorro potencial', W.ahorro * s.n.ahorro, 's1', s.n.ahorro, W.ahorro],
+    ['Rotación', W.rot * s.n.rot, 's2', s.n.rot, W.rot],
+    ['Clase ABC', W.abc * s.n.abc, 's3', s.n.abc, W.abc],
+    ['Facilidad de traslado', W.fac * s.n.fac, 's4', s.n.fac, W.fac]
+  ];
+  const sum = parts.reduce((a, p) => a + p[1], 0);
+  const money = h(s.ahorro) * tarifa;
+
+  const verdict = s.mover
+    ? `<b>Mover</b> de ${esc(zl(s.zona))} a ${esc(zl(ZMIN))}. Con ${nf(s.rot)} visitas al año, bajar el acceso de ${nf(s.t, 2)} a ${nf(TMIN, 2)} min devuelve <b>${nf(h(s.ahorro), 1)} h-h</b> — ${usd(money)} — y es el traslado <b>#${s.rankAhorro}</b> del plan.`
+    : s.zona === ZMIN
+      ? `<b>Mantener</b> en ${esc(zl(s.zona))}. Ya está en la zona más rápida del CD (${nf(TMIN, 2)} min): no existe destino que reduzca su tiempo de acceso.`
+      : `<b>Mantener</b> en ${esc(zl(s.zona))}. Moverlo liberaría ${nf(h(s.ahorro), 1)} h-h, pero ocupa el puesto <b>${s.rankAhorro}</b> del ranking de ahorro y el tope de 20 traslados se agotó en los primeros 20.`;
+
+  const checks = s.mover ? [
+    ['ok', `<b>Una zona por SKU.</b> ${s.sku} queda asignado únicamente a ${esc(zl(ZMIN))}.`],
+    ['ok', `<b>Capacidad del destino.</b> Sus ${nf(s.vol, 3)} m³ entran en el volumen disponible; el plan completo suma 5.78 m³.`],
+    ['ok', `<b>Tope de movimientos.</b> Ocupa el lugar ${s.rankAhorro} de los ${D.meta.max_mov} traslados autorizados.`],
+    [s.grua ? 'warn' : 'ok', s.grua
+      ? `<b>Equipo requerido.</b> Está en nivel ${s.pz} de una zona ${opl(s.op)}: exige grúa y su tiempo real corre ×1.4. El traslado lo elimina.`
+      : `<b>Equipo requerido.</b> Nivel ${s.pz}, operación ${opl(s.op)}: se manipula sin grúa.`]
+  ] : [
+    ['ok', `<b>Una zona por SKU.</b> Sigue asignado a ${esc(zl(s.zona))}, su ubicación actual.`],
+    ['info', `<b>Sin costo de traslado.</b> Mantenerlo no consume presupuesto de movimientos ni capacidad de destino.`],
+    [s.ahorro ? 'warn' : 'ok', s.ahorro
+      ? `<b>Ahorro no capturado.</b> Quedan ${nf(h(s.ahorro), 1)} h-h sobre la mesa; entra al plan si Operaciones sube el tope de traslados.`
+      : `<b>Sin ahorro pendiente.</b> Ninguna zona del layout mejora su tiempo de acceso.`],
+    [s.grua ? 'warn' : 'ok', s.grua
+      ? `<b>Equipo requerido.</b> Permanece en nivel ${s.pz} con grúa: su tiempo real corre ×1.4.`
+      : `<b>Equipo requerido.</b> Nivel ${s.pz}, operación ${opl(s.op)}: sin grúa.`]
+  ];
+
+  document.querySelector(target).innerHTML = `
+    <div class="insp-id">
+      <div class="t"><h3>${s.sku}</h3><span class="tag tag-${s.abc}">${s.abc}</span>
+        <span class="tag ${s.mover ? 'tag-mover' : 'tag-hold'}">${s.mover ? 'Mover' : 'Mantener'}</span>
+        <span class="dim" style="margin-left:auto; font-size:11px">Prioridad #${s.rank}</span></div>
+      <div class="m">${esc(s.marca)} · ${esc(s.fam)} · ${nf(s.rot)} visitas/6 m · ${nf(s.vol, 3)} m³ · ${nf(s.peso, 1)} kg</div>
+    </div>
+    <div class="verdict${s.mover ? '' : ' hold'}">${verdict}</div>
+    <div class="panel-body">
+      <div class="blk">
+        <div class="blk-t">Score de prioridad<span class="v">${nf(s.score, 1)} / 100</span></div>
+        <div class="sbar">${parts.map(p => `<div class="${p[2]}" style="width:${100 * p[1] / sum}%"></div>`).join('')}</div>
+        <div class="skey">${parts.map(p => `<div class="r"><i class="${p[2]}"></i>${p[0]} <em>${nf(p[4] * 100)} % × ${nf(p[3], 2)}</em><b>${nf(100 * p[1], 1)}</b></div>`).join('')}</div>
+      </div>
+      <div class="blk">
+        <div class="blk-t">Aritmética</div>
+        <div class="calc">
+          <div class="r"><span>visitas × min zona actual</span><span>${nf(s.rot)} × ${nf(s.t, 2)} = ${nf(s.costo)}</span></div>
+          <div class="r"><span>visitas × min zona destino</span><span>${nf(s.rot)} × ${nf(TMIN, 2)} = ${nf(s.rot * TMIN)}</span></div>
+          <div class="r tot"><span>ahorro anual</span><span>${nf(s.ahorro)} min · ${nf(h(s.ahorro), 1)} h-h · ${usd(money)}</span></div>
+        </div>
+      </div>
+      <div class="blk">
+        <div class="blk-t">Restricciones del modelo</div>
+        <div class="checks">${checks.map(([st, t]) => `<div class="chk">${ICON[st]}<span>${t}</span></div>`).join('')}</div>
+      </div>
+      <div class="blk">
+        <div class="blk-t">Slot en el gemelo</div>
+        <div class="move">
+          <div class="slot"><div class="l">Actual</div><div class="z">${esc(zl(s.zona))}</div>
+            <div class="c">${esc(s.sub)}<br>p${s.px} · pos ${s.py} · niv ${s.pz}<br>${opl(s.op)}${s.grua ? ' · grúa ×1.4' : ''}</div></div>
+          <svg class="movearrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h11M9.5 4l4 4-4 4"/></svg>
+          ${s.mover
+            ? `<div class="slot to"><div class="l">Propuesto</div><div class="z">${esc(zl(ZMIN))}</div>
+               <div class="c">Bulk / Piso<br>niv 1 · ${nf(TMIN, 2)} min<br>sin grúa</div></div>`
+            : `<div class="slot"><div class="l">Propuesto</div><div class="z dim">Sin cambio</div>
+               <div class="c dim">el gemelo mantiene<br>la misma coordenada</div></div>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ══ ZONAS ═══════════════════════════════════════ */
+const stZonas = {k: 'carga', dir: -1};
+let selZona = D.zonas[0].z;
+function drawZonas() {
+  const rows = sortRows(D.zonas, stZonas);
+  $('#t-zonas').tBodies[0].innerHTML = rows.map(z => {
+    const w = 100 * z.carga / maxCarga, g = z.carga ? 100 * z.pot / z.carga : 0;
+    return `<tr class="pick" data-z="${esc(z.z)}" tabindex="0" role="button" aria-selected="${z.z === selZona}">
+      <td>${esc(zl(z.z))}</td><td class="n dim">${nf(z.t, 2)}</td><td class="n">${z.n}</td>
+      <td class="n">${nf(h(z.carga))}</td>
+      <td><div class="cellbar"><div class="tr"><div class="fl" style="width:${w}%">
+        <div class="keep" style="width:${100 - g}%"></div><div class="gainf" style="width:${g}%"></div></div></div>
+        <span class="pct">${nf(g)} %</span></div></td>
+      <td class="n">${z.mov ? `<span class="tag tag-mover">${z.mov}</span>` : '<span class="dim">—</span>'}</td></tr>`;
+  }).join('');
+  $('#f-zonas').innerHTML = `<td colspan="2">8 zonas activas</td><td class="n">${SK.length}</td>
+    <td class="n">${nf(h(totalMin))}</td><td class="dim">${nf(h(ahorroMin))} h liberables</td><td class="n">20</td>`;
+}
+sorter('#t-zonas', stZonas, drawZonas);
+$('#t-zonas').addEventListener('click', e => { const tr = e.target.closest('tr[data-z]'); if (tr) pickZona(tr.dataset.z); });
+$('#t-zonas').addEventListener('keydown', e => {
+  const tr = e.target.closest('tr[data-z]'); if (!tr) return;
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickZona(tr.dataset.z); }
+});
+function pickZona(z) { selZona = z; drawZonas(); inspectZona(z); }
+function inspectZona(zn) {
+  const z = D.zonas.find(x => x.z === zn);
+  const inZone = SK.filter(s => s.zona === zn);
+  const subs = {};
+  inZone.forEach(s => { (subs[s.sub] ||= {n: 0, heat: 0, grua: 0}); subs[s.sub].n++; subs[s.sub].heat += s.heat; subs[s.sub].grua += +s.grua; });
+  const abc = {A: 0, B: 0, C: 0}; inZone.forEach(s => abc[s.abc]++);
+  $('#insp-zona').innerHTML = `
+    <div class="insp-id">
+      <div class="t"><h3 style="font-family:var(--sans); font-weight:600">${esc(zl(z.z))}</h3>
+        ${z.mov ? `<span class="tag tag-mover">${z.mov} al plan</span>` : '<span class="tag tag-hold">sin cambios</span>'}</div>
+      <div class="m">${nf(z.t, 2)} min por visita · ${z.d} m del despacho · ${z.n} SKU modelados</div>
+    </div>
+    <div class="verdict${z.pot ? '' : ' hold'}">${z.pot
+      ? `Concentra <b>${nf(h(z.carga))} h-h</b> al año. Reubicando sus SKU más visitados se liberarían hasta <b>${nf(h(z.pot))} h-h</b>; el plan actual captura ${z.mov ? nf(h(SK.filter(s => s.mover && s.zona === zn).reduce((a, s) => a + s.ahorro, 0))) : '0'} h-h.`
+      : `Es la zona más rápida del CD. Su carga de <b>${nf(h(z.carga))} h-h</b> es el piso irreducible del picking: aquí no hay nada que ganar moviendo.`}</div>
+    <div class="panel-body">
+      <div class="blk"><div class="blk-t">Subzonas del plano<span class="v">${Object.keys(subs).length}</span></div>
+        <table class="data"><tbody>${Object.entries(subs).sort((a, b) => b[1].heat - a[1].heat).map(([k, v]) =>
+          `<tr><td>${esc(k)}</td><td class="n dim">${v.n} SKU</td><td class="n">${nf(v.heat / v.n)}<span class="dim" style="font-size:10.5px"> heat</span></td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="blk"><div class="blk-t">Perfil de la zona</div>
+        <div class="calc">
+          <div class="r"><span>clases A / B / C</span><span>${abc.A} · ${abc.B} · ${abc.C}</span></div>
+          <div class="r"><span>volumen ocupado</span><span>${nf(inZone.reduce((a, s) => a + s.vol, 0), 2)} m³</span></div>
+          <div class="r"><span>posiciones con grúa</span><span>${inZone.filter(s => s.grua).length} de ${z.n}</span></div>
+          <div class="r tot"><span>carga anual</span><span>${nf(h(z.carga))} h-h · ${usd(h(z.carga) * tarifa)}</span></div>
+        </div>
+      </div>
+      <div class="blk"><div class="blk-t">SKU más costosos de la zona</div>
+        <table class="data"><tbody>${inZone.slice().sort((a, b) => b.costo - a.costo).slice(0, 5).map(s =>
+          `<tr class="pick" data-jump="${s.sku}"><td class="sku">${s.sku}</td><td class="dim">${esc(s.fam)}</td>
+           <td class="n">${nf(h(s.costo), 1)} h</td><td>${s.mover ? '<span class="tag tag-mover">Mover</span>' : '<span class="tag tag-hold">Mantener</span>'}</td></tr>`).join('')}</tbody></table>
+      </div>
+    </div>`;
+  $('#insp-zona').querySelectorAll('[data-jump]').forEach(tr => tr.addEventListener('click', () => {
+    go('catalogo'); $('#q-cat').value = tr.dataset.jump; drawCat(); pick(tr.dataset.jump, 'cat');
+  }));
+}
+
+function drawPlano() {
+  $('#t-plano').tBodies[0].innerHTML = D.plano.map(p => `<tr>
+    <td>${esc(zl(p.zona))}</td><td>${esc(p.sub)}</td>
+    <td class="n">${p.placeholder ? '<span class="dim">sin dato</span>'
+      : `${nf(p.ubicaciones)} <span class="dim">ubic · ${p.pasillos} pasillos · ${p.niveles} niv</span>`}</td>
+    <td class="dim">${opl(p.op)}</td>
+    <td class="n">${p.skus || '<span class="dim">0</span>'}</td>
+    <td>${p.placeholder
+      ? '<span class="tag tag-grua">Falta desglose</span>'
+      : '<span class="tag tag-mover">Mapeada</span>'}</td></tr>`).join('');
+}
+
+/* ══ GEMELO: heat por subzona + log ══════════════ */
+const bySub = {};
+SK.forEach(s => { (bySub[s.sub] ||= {n: 0, heat: 0}); bySub[s.sub].n++; bySub[s.sub].heat += s.heat; });
+const subs = Object.entries(bySub).map(([k, v]) => ({name: k, n: v.n, avg: v.heat / v.n})).sort((a, b) => b.avg - a.avg);
+const hMax = Math.max(...subs.map(s => s.avg)), hMin = Math.min(...subs.map(s => s.avg));
+$('#heatgrid').innerHTML = subs.map(s => {
+  const r = (s.avg - hMin) / (hMax - hMin || 1);
+  const col = r > .66 ? 'var(--red)' : r > .33 ? 'var(--amber)' : 'var(--green)';
+  return `<div class="htile"><div class="n">${esc(s.name)}</div><div class="s">${s.n} SKU · ${nf(s.avg)}</div>
+    <div class="b"><i style="width:${Math.max(6, r * 100)}%; background:${col}"></i></div></div>`;
+}).join('');
+const logLines = [
+  ['06:12', 'corrida #0042 · CBC Óptimo · 800 escenarios'],
+  ['06:12', 'export digital_twin_data.json · 100 registros'],
+  ['06:13', 'visor 3D recargado · heat 136.6–5,459.2'],
+  ['06:14', 'layout world.json · 16 subzonas mapeadas']
+];
+function drawLog() {
+  $('#log').innerHTML = logLines.map(([t, m]) => `<div><time>${t}</time><span>${esc(m)}</span></div>`).join('');
+}
+
+/* ══ controles globales ══════════════════════════ */
+$('#tarifa').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  tarifa = isNaN(v) || v < 0 ? 0 : v;
+  kpis(); drawPlan(); inspect(selPlan, '#insp-plan'); inspect(selCat, '#insp-cat'); inspectZona(selZona);
+});
+document.querySelectorAll('[data-scope]').forEach(b => b.addEventListener('click', () => {
+  scope = b.dataset.scope;
+  document.querySelectorAll('[data-scope]').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+  $('#sb-skus').textContent = scope === 'cd' ? '~10,000' : '100';
+  kpis();
+}));
+const btn = $('#sync'), lbl = $('#sync-label'), toast = $('#toast');
+btn.addEventListener('click', () => {
+  if (btn.dataset.state !== 'idle') return;
+  btn.dataset.state = 'busy'; lbl.textContent = 'Publicando…';
+  setTimeout(() => {
+    btn.dataset.state = 'done'; lbl.textContent = 'Publicado';
+    toast.dataset.show = 'true';
+    const now = new Date().toLocaleTimeString('es-PE', {hour: '2-digit', minute: '2-digit', hour12: false});
+    logLines.unshift([now, 'publicación manual · 100 registros · 20 traslados']);
+    drawLog(); $('#sync-when').textContent = 'hace unos segundos';
+    setTimeout(() => { toast.dataset.show = 'false'; btn.dataset.state = 'idle'; lbl.textContent = 'Publicar al gemelo'; }, 3200);
+  }, 1100);
+});
+
+/* ══ arranque ════════════════════════════════════ */
+[...new Set(SK.map(s => s.zona))].sort().forEach(z => {
+  $('#f-cat-zona').insertAdjacentHTML('beforeend', `<option value="${esc(z)}">${esc(zl(z))}</option>`);
+});
+[...new Set(MOV.map(s => s.zona))].sort().forEach(z => {
+  $('#f-plan-zona').insertAdjacentHTML('beforeend', `<option value="${esc(z)}">${esc(zl(z))}</option>`);
+});
+kpis(); resumenZonas(); diag(); drawPlan(); drawCat(); drawZonas(); drawLog(); drawPlano();
+$('#sb-sel').innerHTML = `Selección <b class="mono">${selPlan}</b>`;
+inspect(selPlan, '#insp-plan'); inspect(selCat, '#insp-cat'); inspectZona(selZona);
+requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add('is-live')));
+})();
+</script>
