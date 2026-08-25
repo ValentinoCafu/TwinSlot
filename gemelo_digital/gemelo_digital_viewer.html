@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gemelo Digital - CD Aldeas Inchcape Perú</title>
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #12141a; font-family: -apple-system, "Segoe UI", Arial, sans-serif; }
+  #canvas-container { width: 100vw; height: 100vh; display: block; }
+  #panel {
+    position: absolute; top: 16px; left: 16px; width: 280px;
+    background: rgba(20, 22, 28, 0.9); color: #e8e8e8; padding: 16px;
+    border-radius: 10px; font-size: 13px; line-height: 1.5;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  #panel h1 { font-size: 15px; margin: 0 0 4px; font-weight: 600; }
+  #panel .sub { color: #9a9a9a; font-size: 12px; margin-bottom: 12px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  #tooltip {
+    position: absolute; display: none; pointer-events: none;
+    background: rgba(15, 16, 20, 0.95); color: #fff; padding: 10px 12px;
+    border-radius: 8px; font-size: 12px; line-height: 1.5; max-width: 240px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  #tooltip b { color: #ffd479; }
+  #stats {
+    position: absolute; bottom: 16px; left: 16px; color: #8a8a8a; font-size: 11px;
+  }
+  #hint {
+    position: absolute; bottom: 16px; right: 16px; color: #8a8a8a; font-size: 11px; text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="panel">
+  <h1>Gemelo digital — CD Aldeas</h1>
+  <div class="sub">Inchcape Perú · muestra académica de 100 SKU (~1% del almacén real)</div>
+  <div class="legend-row"><span class="swatch" style="background:#97C459"></span> Bajo tiempo de picking</div>
+  <div class="legend-row"><span class="swatch" style="background:#FAC775"></span> Medio</div>
+  <div class="legend-row"><span class="swatch" style="background:#F09595"></span> Alto</div>
+  <div class="legend-row"><span class="swatch" style="background:#5B6470; border:1px dashed #888"></span> Requiere grúa (Reach)</div>
+</div>
+
+<div id="tooltip"></div>
+<div id="stats"></div>
+<div id="hint">Arrastra para rotar · rueda para zoom · click derecho para desplazar</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const DATA = [{"sku": "SKU00001", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 675.2, "grua": false, "familia": "Filtros"}, {"sku": "SKU00002", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 1.4, "z": 0.0, "color": "#FAC775", "heat": 1897.4, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00003", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 2.8, "z": 0.0, "color": "#FAC775", "heat": 2600.1, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00004", "zona": "7. MEZANNINE", "subzona": "Estantería 3", "x": 32.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 1335.4, "grua": false, "familia": "Correas"}, {"sku": "SKU00005", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 2.8, "z": 0.0, "color": "#97C459", "heat": 1041.6, "grua": true, "familia": "Soportes"}, {"sku": "SKU00006", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 4.2, "z": 0.0, "color": "#97C459", "heat": 360.6, "grua": true, "familia": "Filtros"}, {"sku": "SKU00007", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 4.2, "z": 0.0, "color": "#97C459", "heat": 1148.1, "grua": true, "familia": "Lubricantes"}, {"sku": "SKU00008", "zona": "8. CLUSTER", "subzona": "Cluster 2", "x": 48.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 946.4, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00009", "zona": "4. RACK BALDA", "subzona": "Estantería 3", "x": 0.0, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2082.2, "grua": false, "familia": "Correas"}, {"sku": "SKU00010", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 16.0, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 1779.1, "grua": false, "familia": "Soportes"}, {"sku": "SKU00011", "zona": "7. MEZANNINE", "subzona": "Estantería 2", "x": 32.0, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 1406.0, "grua": false, "familia": "Filtros"}, {"sku": "SKU00012", "zona": "7. MEZANNINE", "subzona": "Estantería 1", "x": 48.0, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 963.0, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00013", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 17.4, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2240.7, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00014", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 5.6, "z": 0.0, "color": "#97C459", "heat": 788.5, "grua": true, "familia": "Correas"}, {"sku": "SKU00015", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 7.0, "z": 0.0, "color": "#97C459", "heat": 898.2, "grua": true, "familia": "Soportes"}, {"sku": "SKU00016", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 8.4, "z": 0.0, "color": "#97C459", "heat": 676.5, "grua": true, "familia": "Filtros"}, {"sku": "SKU00017", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 502.4, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00018", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 2.8, "z": 0.0, "color": "#97C459", "heat": 1010.2, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00019", "zona": "5. RACK SIMPLE", "subzona": "Rack Alta Rotación", "x": 0.0, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 1047.2, "grua": false, "familia": "Correas"}, {"sku": "SKU00020", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 4.2, "z": 0.0, "color": "#97C459", "heat": 893.8, "grua": true, "familia": "Soportes"}, {"sku": "SKU00021", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 18.8, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 940.2, "grua": false, "familia": "Filtros"}, {"sku": "SKU00022", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 599.0, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00023", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 5.6, "z": 0.0, "color": "#97C459", "heat": 416.6, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00024", "zona": "4. RACK BALDA", "subzona": "Estantería 2", "x": 32.0, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 824.2, "grua": false, "familia": "Correas"}, {"sku": "SKU00025", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 20.2, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2471.6, "grua": false, "familia": "Soportes"}, {"sku": "SKU00026", "zona": "6. RACK COLGANTES", "subzona": "Rack Colgantes", "x": 48.0, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 1747.2, "grua": false, "familia": "Filtros"}, {"sku": "SKU00027", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 2.8, "z": 32.0, "color": "#97C459", "heat": 144.7, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00028", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 7.0, "z": 0.0, "color": "#97C459", "heat": 790.7, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00029", "zona": "4. RACK BALDA", "subzona": "Estantería 1", "x": 0.0, "y": 1.4, "z": 48.0, "color": "#FAC775", "heat": 2019.6, "grua": false, "familia": "Correas"}, {"sku": "SKU00030", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 8.4, "z": 0.0, "color": "#97C459", "heat": 1008.0, "grua": true, "familia": "Soportes"}, {"sku": "SKU00031", "zona": "8. CLUSTER", "subzona": "Cluster 1", "x": 16.0, "y": 1.4, "z": 48.0, "color": "#97C459", "heat": 541.4, "grua": false, "familia": "Filtros"}, {"sku": "SKU00032", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 473.6, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00033", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 2.8, "z": 0.0, "color": "#97C459", "heat": 450.2, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00034", "zona": "7. MEZANNINE", "subzona": "Estantería 3", "x": 33.4, "y": 1.4, "z": 0.0, "color": "#FAC775", "heat": 2767.0, "grua": false, "familia": "Correas"}, {"sku": "SKU00035", "zona": "5. RACK SIMPLE", "subzona": "Rack Alta Rotación", "x": 1.4, "y": 1.4, "z": 32.0, "color": "#FAC775", "heat": 2522.2, "grua": false, "familia": "Soportes"}, {"sku": "SKU00036", "zona": "8. CLUSTER", "subzona": "Cluster 2", "x": 49.4, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 1355.4, "grua": false, "familia": "Filtros"}, {"sku": "SKU00037", "zona": "7. MEZANNINE", "subzona": "Estantería 2", "x": 33.4, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 1887.5, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00038", "zona": "6. RACK COLGANTES", "subzona": "Rack Colgantes", "x": 48.0, "y": 2.8, "z": 32.0, "color": "#97C459", "heat": 267.1, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00039", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 16.0, "y": 1.4, "z": 17.4, "color": "#97C459", "heat": 1767.8, "grua": false, "familia": "Correas"}, {"sku": "SKU00040", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 4.2, "z": 0.0, "color": "#97C459", "heat": 595.8, "grua": true, "familia": "Soportes"}, {"sku": "SKU00041", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 5.6, "z": 0.0, "color": "#97C459", "heat": 593.6, "grua": true, "familia": "Filtros"}, {"sku": "SKU00042", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 7.0, "z": 0.0, "color": "#97C459", "heat": 188.2, "grua": true, "familia": "Lubricantes"}, {"sku": "SKU00043", "zona": "7. MEZANNINE", "subzona": "Estantería 1", "x": 49.4, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2182.8, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00044", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 17.4, "y": 1.4, "z": 17.4, "color": "#FAC775", "heat": 2392.8, "grua": false, "familia": "Correas"}, {"sku": "SKU00045", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 4.2, "z": 32.0, "color": "#97C459", "heat": 856.3, "grua": false, "familia": "Soportes"}, {"sku": "SKU00046", "zona": "7. MEZANNINE", "subzona": "Estantería 3", "x": 34.8, "y": 1.4, "z": 0.0, "color": "#FAC775", "heat": 1926.0, "grua": false, "familia": "Filtros"}, {"sku": "SKU00047", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 5.6, "z": 32.0, "color": "#97C459", "heat": 816.1, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00048", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 8.4, "z": 0.0, "color": "#97C459", "heat": 136.6, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00049", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 5.6, "z": 0.0, "color": "#FAC775", "heat": 3545.6, "grua": true, "familia": "Correas"}, {"sku": "SKU00050", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 580.8, "grua": false, "familia": "Soportes"}, {"sku": "SKU00051", "zona": "4. RACK BALDA", "subzona": "Estantería 3", "x": 1.4, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2038.9, "grua": false, "familia": "Filtros"}, {"sku": "SKU00052", "zona": "5. RACK SIMPLE", "subzona": "Rack Doble", "x": 32.0, "y": 1.4, "z": 48.0, "color": "#97C459", "heat": 1278.0, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00053", "zona": "6. RACK COLGANTES", "subzona": "Rack Colgantes", "x": 48.0, "y": 4.2, "z": 32.0, "color": "#97C459", "heat": 1379.0, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00054", "zona": "5. RACK SIMPLE", "subzona": "Rack Alta Rotación", "x": 0.0, "y": 1.4, "z": 33.4, "color": "#FAC775", "heat": 2544.8, "grua": false, "familia": "Correas"}, {"sku": "SKU00055", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 18.8, "y": 1.4, "z": 17.4, "color": "#97C459", "heat": 1869.2, "grua": false, "familia": "Soportes"}, {"sku": "SKU00056", "zona": "4. RACK BALDA", "subzona": "Estantería 2", "x": 33.4, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 1012.2, "grua": false, "familia": "Filtros"}, {"sku": "SKU00057", "zona": "6. RACK COLGANTES", "subzona": "Rack Colgantes", "x": 48.0, "y": 5.6, "z": 32.0, "color": "#97C459", "heat": 747.3, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00058", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 271.3, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00059", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 2.8, "z": 0.0, "color": "#97C459", "heat": 954.2, "grua": true, "familia": "Correas"}, {"sku": "SKU00060", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 4.2, "z": 0.0, "color": "#97C459", "heat": 560.0, "grua": true, "familia": "Soportes"}, {"sku": "SKU00061", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 5.6, "z": 0.0, "color": "#97C459", "heat": 423.4, "grua": true, "familia": "Filtros"}, {"sku": "SKU00062", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 7.0, "z": 0.0, "color": "#97C459", "heat": 1014.7, "grua": true, "familia": "Lubricantes"}, {"sku": "SKU00063", "zona": "6. RACK COLGANTES", "subzona": "Rack Colgantes", "x": 48.0, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 729.2, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00064", "zona": "6. RACK COLGANTES", "subzona": "Rack Colgantes", "x": 48.0, "y": 2.8, "z": 32.0, "color": "#97C459", "heat": 1032.5, "grua": false, "familia": "Correas"}, {"sku": "SKU00065", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 7.0, "z": 0.0, "color": "#FAC775", "heat": 3162.9, "grua": true, "familia": "Soportes"}, {"sku": "SKU00066", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 20.2, "y": 1.4, "z": 17.4, "color": "#FAC775", "heat": 2347.7, "grua": false, "familia": "Filtros"}, {"sku": "SKU00067", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 8.4, "z": 0.0, "color": "#F09595", "heat": 3669.5, "grua": true, "familia": "Lubricantes"}, {"sku": "SKU00068", "zona": "7. MEZANNINE", "subzona": "Estantería 2", "x": 34.8, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2664.3, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00069", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 2.8, "z": 32.0, "color": "#97C459", "heat": 962.8, "grua": false, "familia": "Correas"}, {"sku": "SKU00070", "zona": "4. RACK BALDA", "subzona": "Estantería 1", "x": 1.4, "y": 1.4, "z": 48.0, "color": "#97C459", "heat": 563.9, "grua": false, "familia": "Soportes"}, {"sku": "SKU00071", "zona": "4. RACK BALDA", "subzona": "Estantería 3", "x": 2.8, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 409.7, "grua": false, "familia": "Filtros"}, {"sku": "SKU00072", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 980.9, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00073", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 8.4, "z": 0.0, "color": "#97C459", "heat": 315.8, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00074", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 2.8, "z": 0.0, "color": "#FAC775", "heat": 3365.5, "grua": true, "familia": "Correas"}, {"sku": "SKU00075", "zona": "7. MEZANNINE", "subzona": "Estantería 1", "x": 50.8, "y": 1.4, "z": 16.0, "color": "#FAC775", "heat": 2304.8, "grua": false, "familia": "Soportes"}, {"sku": "SKU00076", "zona": "8. CLUSTER", "subzona": "Cluster 1", "x": 17.4, "y": 1.4, "z": 48.0, "color": "#97C459", "heat": 810.0, "grua": false, "familia": "Filtros"}, {"sku": "SKU00077", "zona": "4. RACK BALDA", "subzona": "Estantería 2", "x": 34.8, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 496.5, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00078", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 4.2, "z": 0.0, "color": "#F09595", "heat": 5459.2, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00079", "zona": "4. RACK BALDA", "subzona": "Estantería 1", "x": 2.8, "y": 1.4, "z": 48.0, "color": "#97C459", "heat": 833.9, "grua": false, "familia": "Correas"}, {"sku": "SKU00080", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 203.2, "grua": false, "familia": "Soportes"}, {"sku": "SKU00081", "zona": "8. CLUSTER", "subzona": "Cluster 2", "x": 50.8, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 1583.9, "grua": false, "familia": "Filtros"}, {"sku": "SKU00082", "zona": "4. RACK BALDA", "subzona": "Estantería 3", "x": 4.2, "y": 1.4, "z": 16.0, "color": "#97C459", "heat": 1841.2, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00083", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 5.6, "z": 0.0, "color": "#F09595", "heat": 4592.4, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00084", "zona": "7. MEZANNINE", "subzona": "Estantería 3", "x": 36.2, "y": 1.4, "z": 0.0, "color": "#FAC775", "heat": 2812.0, "grua": false, "familia": "Correas"}, {"sku": "SKU00085", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 4.2, "z": 32.0, "color": "#97C459", "heat": 997.0, "grua": false, "familia": "Soportes"}, {"sku": "SKU00086", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 7.0, "z": 0.0, "color": "#F09595", "heat": 4063.4, "grua": true, "familia": "Filtros"}, {"sku": "SKU00087", "zona": "4. RACK BALDA", "subzona": "Estantería 2", "x": 36.2, "y": 1.4, "z": 32.0, "color": "#97C459", "heat": 1335.1, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00088", "zona": "5. RACK SIMPLE", "subzona": "Rack Alta Rotación", "x": 1.4, "y": 1.4, "z": 33.4, "color": "#97C459", "heat": 1120.4, "grua": false, "familia": "Pastillas"}, {"sku": "SKU00089", "zona": "8. CLUSTER", "subzona": "Cluster 3", "x": 48.0, "y": 1.4, "z": 48.0, "color": "#97C459", "heat": 1371.4, "grua": false, "familia": "Correas"}, {"sku": "SKU00090", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 16.0, "y": 1.4, "z": 18.8, "color": "#97C459", "heat": 1385.0, "grua": false, "familia": "Soportes"}, {"sku": "SKU00091", "zona": "10. UBICACIÓN RECIBO", "subzona": "Recepción de Aéreos", "x": 16.0, "y": 5.6, "z": 32.0, "color": "#97C459", "heat": 673.3, "grua": false, "familia": "Filtros"}, {"sku": "SKU00092", "zona": "8. CLUSTER", "subzona": "Cluster 2", "x": 48.0, "y": 1.4, "z": 1.4, "color": "#97C459", "heat": 1579.9, "grua": false, "familia": "Lubricantes"}, {"sku": "SKU00093", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 8.4, "z": 0.0, "color": "#97C459", "heat": 1249.4, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00094", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 1.4, "z": 0.0, "color": "#97C459", "heat": 1680.4, "grua": false, "familia": "Correas"}, {"sku": "SKU00095", "zona": "4. RACK BALDA", "subzona": "Estantería 1", "x": 4.2, "y": 1.4, "z": 48.0, "color": "#FAC775", "heat": 1937.6, "grua": false, "familia": "Soportes"}, {"sku": "SKU00096", "zona": "5. RACK SIMPLE", "subzona": "Rack Pallet", "x": 17.4, "y": 1.4, "z": 18.8, "color": "#97C459", "heat": 1187.9, "grua": false, "familia": "Filtros"}, {"sku": "SKU00097", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 2.8, "z": 0.0, "color": "#FAC775", "heat": 2960.3, "grua": true, "familia": "Lubricantes"}, {"sku": "SKU00098", "zona": "1. LLANTAS", "subzona": "Rack Neumáticos", "x": 16.0, "y": 4.2, "z": 0.0, "color": "#F09595", "heat": 3894.6, "grua": true, "familia": "Pastillas"}, {"sku": "SKU00099", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 2.8, "z": 0.0, "color": "#97C459", "heat": 913.9, "grua": true, "familia": "Correas"}, {"sku": "SKU00100", "zona": "2. PISO", "subzona": "Bulk / Piso", "x": 0.0, "y": 4.2, "z": 0.0, "color": "#97C459", "heat": 1030.4, "grua": true, "familia": "Soportes"}];
+
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x12141a);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(40, 45, 60);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(24, 2, 24);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.update();
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+dirLight.position.set(30, 50, 20);
+scene.add(dirLight);
+
+const grid = new THREE.GridHelper(80, 40, 0x2a2d36, 0x1c1e24);
+grid.position.set(24, 0, 24);
+scene.add(grid);
+
+const boxGeo = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+const edgeGeo = new THREE.EdgesGeometry(boxGeo);
+
+const meshes = [];
+DATA.forEach(d => {
+  const mat = new THREE.MeshLambertMaterial({ color: d.color });
+  const mesh = new THREE.Mesh(boxGeo, mat);
+  mesh.position.set(d.x, d.y, d.z);
+  mesh.userData = d;
+  scene.add(mesh);
+  meshes.push(mesh);
+
+  if (d.grua) {
+    const edges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 }));
+    edges.position.copy(mesh.position);
+    scene.add(edges);
+  }
+});
+
+document.getElementById('stats').textContent = `${DATA.length} SKU renderizados`;
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const tooltip = document.getElementById('tooltip');
+
+function onMouseMove(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(meshes);
+
+  if (hits.length > 0) {
+    const d = hits[0].object.userData;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (event.clientX + 14) + 'px';
+    tooltip.style.top = (event.clientY + 14) + 'px';
+    tooltip.innerHTML = `<b>${d.sku}</b><br>${d.familia}<br>${d.zona}<br>${d.subzona}<br>Tiempo picking: ${d.heat} min/año${d.grua ? '<br><span style="color:#ffb4b4">Requiere grúa</span>' : ''}`;
+  } else {
+    tooltip.style.display = 'none';
+  }
+}
+window.addEventListener('mousemove', onMouseMove);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
