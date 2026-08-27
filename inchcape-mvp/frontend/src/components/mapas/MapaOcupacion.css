@@ -1,0 +1,55 @@
+/* Vista previa de espacios al pasar el mouse sobre una zona con
+ * capacidad definida (espaciosZona.ts) -- reutiliza <GrillaSkus> pero
+ * en tamaño compacto: sin resúmenes ni código de SKU, solo el color. Se
+ * ancla en la esquina superior izquierda de la zona sobre la que se
+ * pasa el mouse (no recorta a su forma exacta, es una vista previa, el
+ * detalle completo sigue en el modal al hacer click). */
+.espacios-hover {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  background: var(--tiza);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-sm);
+  box-shadow: var(--sombra-md);
+  padding: 6px;
+  max-height: 220px;
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.espacios-hover .grilla-resumen,
+.espacios-hover .grilla-desbordado,
+.espacios-hover .grilla-nota-sin-capacidad,
+.espacios-hover .grilla-pasillo {
+  display: none;
+}
+.espacios-hover .grilla-zona {
+  gap: 3px;
+}
+.espacios-hover .grilla-fila {
+  gap: 3px;
+}
+.espacios-hover .grilla-bloque {
+  padding: 2px;
+  gap: 1px;
+  background: rgba(0, 0, 0, 0.02);
+}
+.espacios-hover .grilla-subfila,
+.espacios-hover .grilla-subfila-auto {
+  gap: 1px;
+}
+.espacios-hover .slot {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  border-radius: 2px;
+  font-size: 0;
+  border-width: 0.5px;
+}
+.espacios-hover .slot-libre {
+  opacity: 0.5;
+}
+.espacios-hover .slot-flecha {
+  display: none;
+}

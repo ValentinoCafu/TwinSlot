@@ -1,0 +1,139 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  flex: 0 0 240px;
+  background: var(--tiza);
+  border-right: 1px solid var(--linea);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 8px;
+  margin-bottom: 24px;
+}
+.sidebar-brand-badge {
+  align-self: flex-start;
+  background: var(--oro);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 4px 10px;
+  border-radius: var(--radio-pill);
+}
+.sidebar-brand-sub {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grafito2);
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar-link {
+  text-align: left;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14.5px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--grafito2);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.sidebar-link:hover {
+  background: rgba(127, 127, 127, 0.14);
+  color: var(--grafito);
+}
+.sidebar-link.activa {
+  /* Fondo fijo en el acento, no en --grafito: --grafito se invierte en modo
+   * oscuro (pasa a casi-blanco), y un fondo casi-blanco con texto blanco
+   * dejaba el ítem activo ilegible. --senal se mantiene un azul vivo en
+   * ambos temas. */
+  background: var(--senal);
+  color: #fff;
+}
+.sidebar-link:focus-visible {
+  outline: 2px solid var(--senal);
+  outline-offset: 2px;
+}
+
+.sidebar-tema {
+  margin-top: auto;
+  align-self: flex-start;
+}
+.sidebar-tema button {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.sidebar-nota {
+  padding: 12px 8px 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--grafito2);
+  border-top: 1px solid var(--linea);
+}
+
+.shell-content {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 40px 80px;
+  max-width: 1180px;
+}
+
+.shell-header {
+  margin-bottom: 28px;
+}
+.shell-header h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  color: var(--grafito);
+}
+.shell-header p {
+  color: var(--grafito2);
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+@media (max-width: 860px) {
+  .shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .sidebar nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .shell-content {
+    padding: 24px 20px 60px;
+  }
+}
+
+main section {
+  margin-bottom: 40px;
+}

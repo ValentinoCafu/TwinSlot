@@ -1,0 +1,42 @@
+.reglas-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.reglas-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--grafito2);
+}
+.reglas-campo input,
+.reglas-campo select {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  padding: 7px 10px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-sm);
+  background: var(--tiza);
+  color: var(--grafito);
+  min-width: 140px;
+}
+.reglas-campo input:focus-visible,
+.reglas-campo select:focus-visible {
+  outline: 2px solid var(--senal);
+  outline-offset: 1px;
+}
+.reglas-fila {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: var(--radio-md);
+}
+.reglas-nota {
+  font-size: 11px;
+  color: var(--grafito2);
+  flex-basis: 100%;
+}

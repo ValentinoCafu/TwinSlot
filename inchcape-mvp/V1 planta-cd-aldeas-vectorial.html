@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planta CD Aldeas VES · réplica vectorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --concreto:#D7D4CC;--grafito:#1B2025;--grafito2:#3A434B;--oro:#FFC300;
+  --senal:#0F5F8F;--riesgo:#BE3A1D;--tiza:#F5F3EE;--linea:rgba(27,32,37,.22);
+  /* paleta calcada del plano original */
+  --c-cluster:#7ED9D4;--c-clustertan:#CDC280;--c-recepcion:#1B7A4A;
+  --c-estanteria:#5FBFBA;--c-doble:#E9E58A;--c-simple:#9B8FC4;
+  --c-balda14:#A8B87E;--c-balda22:#C4707A;--c-neumaticos:#B9A0A6;
+  --c-bulk:#3B3A48;--c-mesas:#E49075;--c-carpin:#B4B696;
+  --c-colgantes:#7FB2D4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--concreto);
+  background-image:linear-gradient(var(--linea) 1px,transparent 1px),linear-gradient(90deg,var(--linea) 1px,transparent 1px);
+  background-size:100% 44px,44px 100%;
+  color:var(--grafito);font-family:'Barlow',system-ui,sans-serif;font-size:15px;line-height:1.5;padding-bottom:60px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+.top{border-bottom:2px solid var(--grafito);padding:26px 0 16px;margin-bottom:22px}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--grafito2);display:flex;gap:13px;flex-wrap:wrap;align-items:center}
+.eyebrow b{background:var(--grafito);color:var(--oro);padding:2px 7px;font-weight:600;letter-spacing:.14em}
+h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(32px,6.2vw,56px);line-height:.94;
+  letter-spacing:-.015em;text-transform:uppercase;margin:12px 0 6px}
+h1 em{font-style:normal;color:var(--senal)}
+.sub{max-width:62ch;color:var(--grafito2)}
+.headrow{display:flex;justify-content:space-between;align-items:flex-end;gap:22px;flex-wrap:wrap}
+
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.sw{display:flex;border:2px solid var(--grafito);background:var(--tiza)}
+.sw button{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;text-transform:uppercase;
+  letter-spacing:.08em;padding:8px 15px;border:0;background:none;color:var(--grafito2);cursor:pointer}
+.sw button+button{border-left:2px solid var(--grafito)}
+.sw button[aria-pressed="true"]{background:var(--grafito);color:var(--oro)}
+.sw button:focus-visible{outline:3px solid var(--senal);outline-offset:2px}
+
+.stage{display:grid;grid-template-columns:1.45fr 1fr;gap:20px;align-items:start}
+@media(max-width:940px){.stage{grid-template-columns:1fr}}
+.panel{background:var(--tiza);border:2px solid var(--grafito);margin-bottom:18px}
+.panel>header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 15px;
+  border-bottom:2px solid var(--grafito);background:var(--grafito);flex-wrap:wrap}
+.panel>header h2{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:18px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--tiza)}
+.panel>header .note{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--oro)}
+.panel .body{padding:15px}
+
+/* ---------- plano ---------- */
+.planwrap{position:relative;background:#fff;border:1px solid var(--linea)}
+svg.plan{display:block;width:100%;height:auto}
+.zone{stroke:#2A3138;stroke-width:1.6;stroke-linejoin:round;cursor:pointer;
+  transition:fill .45s cubic-bezier(.4,0,.2,1),opacity .2s}
+.zone:hover{opacity:.72}
+.zone:focus-visible{outline:none;stroke:var(--senal);stroke-width:4}
+.lbl{font-family:'Barlow Condensed',sans-serif;font-weight:600;pointer-events:none;
+  paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.lbl.sm{font-family:'IBM Plex Mono',monospace;font-weight:500;stroke-width:2.5px}
+.shell{fill:none;stroke:#1B2025;stroke-width:2.6;stroke-linejoin:round}
+.dock{fill:#fff;stroke:#BE3A1D;stroke-width:1.3}
+.dock.act{fill:var(--oro)}
+.docknum{font-family:'IBM Plex Mono',monospace;font-size:6.5px;fill:#BE3A1D;pointer-events:none}
+.grid-m{stroke:rgba(27,32,37,.10);stroke-width:.8}
+.io{fill:var(--oro);stroke:#1B2025;stroke-width:2}
+
+.tip{position:absolute;pointer-events:none;background:var(--grafito);color:var(--tiza);
+  padding:8px 11px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.55;
+  opacity:0;transition:opacity .13s;max-width:230px;z-index:5;border-left:3px solid var(--oro)}
+.tip b{color:var(--oro);font-weight:600;display:block;margin-bottom:3px;letter-spacing:.05em}
+
+.legend{margin-top:12px;padding-top:11px;border-top:1px dashed var(--linea);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:5px 14px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grafito2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.chip{width:20px;height:11px;border:1px solid var(--grafito);flex-shrink:0}
+.caption{margin-top:11px;font-size:12.5px;line-height:1.45;color:var(--grafito2)}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.11em;text-transform:uppercase;text-align:left;
+  padding:0 7px 4px 0;color:var(--grafito2);border-bottom:1.5px solid var(--grafito);white-space:nowrap}
+td{padding:5px 7px 5px 0;border-bottom:1px solid var(--linea)}
+td.num{font-family:'IBM Plex Mono',monospace;text-align:right;padding-right:10px;white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody tr:hover td,tbody tr.on td{background:rgba(15,95,143,.11)}
+tr.hl td{background:rgba(255,195,0,.3)}
+.sq{display:inline-block;width:11px;height:11px;border:1px solid var(--grafito);vertical-align:-1px;margin-right:7px}
+.scroll{overflow-x:auto}
+footer{margin-top:24px;padding-top:14px;border-top:2px solid var(--grafito);
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.75;color:var(--grafito2)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="top"><div class="headrow">
+  <div>
+    <div class="eyebrow"><b>Planta vectorial</b><span>CD Aldeas · Villa El Salvador</span><span>Contornos trazados del plano</span><span>587 × 603 px → coordenadas reales</span></div>
+    <h1>Réplica del plano<br><em>en geometría editable</em></h1>
+    <p class="sub">Cada zona es un polígono con sus vértices reales, no un rectángulo. Los bordes siguen la diagonal del terreno. Pasa el cursor por una zona o por una fila de la tabla.</p>
+  </div>
+  <div class="ctrl">
+    <div class="sw" role="group" aria-label="Coloreado">
+      <button id="bTec" aria-pressed="true">Técnica</button>
+      <button id="bDen" aria-pressed="false">Densidad</button>
+      <button id="bDis" aria-pressed="false">Distancia</button>
+    </div>
+  </div>
+</div></div>
+
+<div class="stage">
+
+<section class="panel">
+  <header><h2>Planta · zonificación</h2><span class="note" id="modo">Color por técnica de almacenamiento</span></header>
+  <div class="body">
+    <div class="planwrap">
+      <svg class="plan" viewBox="20 0 560 610" role="img" aria-label="Planta del centro de distribución con las zonas de almacenamiento">
+        <!-- retícula métrica -->
+        <g class="grid-m" id="gridm"></g>
+        <!-- envolvente del edificio -->
+        <polygon class="shell" points="40,10 207,10 564,459 125,592 40,592"/>
+        <!-- zonas -->
+        <g id="zones"></g>
+        <!-- muelles -->
+        <g id="docks"></g>
+        <circle class="io" cx="46" cy="300" r="7"/>
+        <text x="58" y="303" class="lbl sm" font-size="9" fill="#1B2025">I/O</text>
+        <!-- etiquetas -->
+        <g id="labels"></g>
+        <!-- escala -->
+        <g class="lbl sm" font-size="8.5" fill="#3A434B">
+          <line x1="400" y1="575" x2="480" y2="575" stroke="#1B2025" stroke-width="1.6" stroke-linecap="square"/>
+          <line x1="400" y1="571" x2="400" y2="579" stroke="#1B2025" stroke-width="1.6"/>
+          <line x1="480" y1="571" x2="480" y2="579" stroke="#1B2025" stroke-width="1.6"/>
+          <text x="440" y="569" text-anchor="middle">≈ 20 m</text>
+        </g>
+      </svg>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="legend" id="leg"></div>
+    <p class="caption"><b>Cómo se obtuvo.</b> Segmentación por color del plano original, cierre morfológico para saltar la trama de racks, extracción del contorno externo y simplificación Douglas–Peucker. La diagonal del terreno se ajustó a <span class="mono">x = 207 + 0.787·(y − 10)</span> sobre el perfil del edificio. La escala es aproximada: fija el factor cuando tengas una cota real del plano.</p>
+  </div>
+</section>
+
+<div>
+<section class="panel">
+  <header><h2>Zonas</h2><span class="note">11 polígonos</span></header>
+  <div class="body scroll">
+    <table><thead><tr>
+      <th>Zona</th><th>Clave Excel</th><th style="text-align:right">Dist.</th><th style="text-align:right">Ubic.</th>
+    </tr></thead><tbody id="tb"></tbody></table>
+  </div>
+</section>
+
+<section class="panel">
+  <header><h2>Geometría capturada</h2><span class="note">Verificable</span></header>
+  <div class="body">
+    <table><tbody>
+      <tr><td>Vértices totales</td><td class="num" id="nv">—</td></tr>
+      <tr><td>Zonas trazadas</td><td class="num">11</td></tr>
+      <tr><td>Muelles en el flanco</td><td class="num">16</td></tr>
+      <tr><td>Pendiente de la diagonal</td><td class="num">0.787</td></tr>
+      <tr><td>Superficie del polígono</td><td class="num">204 184 px²</td></tr>
+    </tbody></table>
+    <p class="caption">Los polígonos viven en el atributo <span class="mono">points</span> de cada elemento. Para conectarlos con datos basta con reemplazar el <span class="mono">fill</span> — el interruptor de arriba hace exactamente eso sobre tres campos distintos.</p>
+  </div>
+</section>
+</div>
+</div>
+
+<footer>
+  <b>Origen.</b> Plano «Mapa de Zonificación por Técnica de Almacenamiento» · CD Aldeas, Villa El Salvador · Inchcape Perú.<br>
+  <b>Nota.</b> Distancias medidas al centro del muro de muelles bajo calibración L = 110 m para el recorrido más largo. El punto I/O es un supuesto pendiente de confirmar en planta.
+</footer>
+
+</div>
+<script>
+/* geometría trazada del plano — coordenadas en el sistema de la imagen original */
+const Z=[
+ {id:"cluster",  n:"Multinivel Cluster", ex:"8. CLUSTER", d:95, u:"10 636", h:134, c:"#7ED9D4",
+  p:"41,8 103,8 103,45 122,52 122,57 41,57", lx:72, ly:36, fs:9, rot:0},
+ {id:"clustan",  n:"Cluster (mezz.)", ex:"8. CLUSTER", d:95, u:"—", h:0, c:"#CDC280",
+  p:"110,14 187,14 204,41 137,41", lx:158, ly:31, fs:8, rot:0},
+ {id:"recepcion",n:"Recepción de aéreos", ex:"10. UBICACIÓN RECIBO", d:79, u:"—", h:115, c:"#1B7A4A",
+  p:"43,60 105,60 105,106 84,106 84,169 41,169 41,60", lx:64, ly:135, fs:8, rot:0, light:1},
+ {id:"estanteria",n:"Multinivel Estantería", ex:"7. MEZANNINE", d:100, u:"1 628", h:140, c:"#5FBFBA",
+  p:"100,54 225,54 329,204 131,204 131,178 107,170 107,66", lx:216, ly:130, fs:13, rot:0},
+ {id:"doble",    n:"Rack Doble", ex:"(nuevo)", d:87, u:"265", h:0, c:"#E9E58A",
+  p:"120,208 318,208 327,225 120,225", lx:222, ly:221, fs:9, rot:0},
+ {id:"simple",   n:"Rack Simple", ex:"5. RACK SIMPLE", d:82, u:"2 468", h:215, c:"#9B8FC4",
+  p:"123,226 345,226 389,290 123,290", lx:250, ly:262, fs:14, rot:0},
+ {id:"balda14",  n:"Rack Balda 1.4 m", ex:"4. RACK BALDA", d:73, u:"—", h:88, c:"#A8B87E",
+  p:"124,303 400,303 459,375 124,375", lx:280, ly:344, fs:13, rot:0},
+ {id:"balda22",  n:"Rack Balda 2.2 m", ex:"4. RACK BALDA", d:73, u:"—", h:89, c:"#C4707A",
+  p:"116,377 470,377 479,450 116,450", lx:292, ly:418, fs:13, rot:0},
+ {id:"neumaticos",n:"Rack Neumáticos", ex:"1. LLANTAS", d:91, u:"—", h:225, c:"#B9A0A6",
+  p:"116,451 481,451 486,469 116,469", lx:300, ly:464, fs:8, rot:0},
+ {id:"bulk",     n:"Bulk", ex:"2. PISO", d:85, u:"—", h:392, c:"#3B3A48",
+  p:"112,470 464,470 393,517 176,560 102,560 102,470", lx:220, ly:518, fs:15, rot:0, light:1},
+ {id:"colgantes",n:"Rack Colgantes", ex:"6. RACK COLGANTES", d:110, u:"—", h:102, c:"#7FB2D4",
+  p:"347,213 364,213 556,462 538,462", lx:452, ly:340, fs:9, rot:52},
+ {id:"mesas",    n:"Mesas de trabajo", ex:"—", d:12, u:"—", h:0, c:"#E49075",
+  p:"40,206 95,206 95,372 40,372", lx:68, ly:289, fs:9, rot:-90},
+ {id:"carpin",   n:"Zona de carpintería", ex:"—", d:14, u:"—", h:0, c:"#B4B696",
+  p:"40,378 95,378 95,418 40,418", lx:68, ly:400, fs:7, rot:0}
+];
+const $=i=>document.getElementById(i);
+let modo="tec", sel=null;
+
+/* escalas */
+const hmax=Math.max(...Z.map(z=>z.h))||1;
+const dmin=Math.min(...Z.map(z=>z.d)), dmax=Math.max(...Z.map(z=>z.d));
+function fill(z){
+  if(modo==="tec") return z.c;
+  if(modo==="den") return z.h===0 ? "#FFFFFF"
+    : `color-mix(in srgb,#0F5F8F ${Math.round(14+(z.h/hmax)*86)}%,#DCE6ED)`;
+  const t=(z.d-dmin)/(dmax-dmin);
+  return `color-mix(in srgb,#BE3A1D ${Math.round(8+t*82)}%,#FFE9C9)`;
+}
+function isLight(z){
+  if(modo==="tec") return z.light?1:0;
+  if(modo==="den") return z.h/hmax>0.55?1:0;
+  return (z.d-dmin)/(dmax-dmin)>0.6?1:0;
+}
+function draw(){
+  $("zones").innerHTML=Z.map(z=>
+    `<polygon class="zone" id="z-${z.id}" tabindex="0" points="${z.p}" fill="${fill(z)}"
+      data-id="${z.id}"><title>${z.n}</title></polygon>`).join("");
+  $("labels").innerHTML=Z.map(z=>{
+    const col=isLight(z)?"#F5F3EE":"#1B2025";
+    const st=isLight(z)?"#1B2025":"#FFFFFF";
+    const tr=z.rot?` transform="rotate(${z.rot} ${z.lx} ${z.ly})"`:"";
+    return `<text class="lbl" x="${z.lx}" y="${z.ly}" font-size="${z.fs}" fill="${col}"
+      style="stroke:${st}" text-anchor="middle"${tr}>${z.n}</text>`;
+  }).join("");
+  /* muelles numerados sobre el flanco izquierdo */
+  let d="";for(let i=0;i<16;i++){const y=70+i*30;
+    d+=`<rect class="dock" x="31" y="${y}" width="11" height="15"/>
+        <text class="docknum" x="36.5" y="${y+11}" text-anchor="middle">${i+1}</text>`;}
+  $("docks").innerHTML=d;
+  /* retícula */
+  let g="";for(let x=40;x<580;x+=40)g+=`<line class="grid-m" x1="${x}" y1="0" x2="${x}" y2="610"/>`;
+  for(let y=0;y<610;y+=40)g+=`<line class="grid-m" x1="20" y1="${y}" x2="580" y2="${y}"/>`;
+  $("gridm").innerHTML=g;
+  $("nv").textContent=Z.reduce((a,z)=>a+z.p.trim().split(/\s+/).length,0);
+  $("modo").textContent={tec:"Color por técnica de almacenamiento",
+    den:"Color por densidad de picking",dis:"Color por distancia al I/O"}[modo];
+  $("leg").innerHTML=Z.filter(z=>z.ex!=="—").map(z=>
+    `<span><i class="chip" style="background:${fill(z)}"></i>${z.n}</span>`).join("");
+  bind();
+}
+function tabla(){
+  $("tb").innerHTML=Z.map(z=>
+    `<tr data-id="${z.id}"><td><i class="sq" style="background:${z.c}"></i>${z.n}</td>
+     <td class="mono" style="font-size:11px">${z.ex}</td>
+     <td class="num">${z.ex==="—"?"—":z.d+" m"}</td><td class="num">${z.u}</td></tr>`).join("");
+  [...$("tb").rows].forEach(r=>{
+    r.onmouseenter=()=>hi(r.dataset.id,true);
+    r.onmouseleave=()=>hi(r.dataset.id,false);
+  });
+}
+function hi(id,on){
+  const p=$("z-"+id); if(p) p.style.strokeWidth=on?"4":"1.6";
+  const r=[...$("tb").rows].find(x=>x.dataset.id===id); if(r) r.classList.toggle("on",on);
+}
+function bind(){
+  const tip=$("tip"), box=document.querySelector(".planwrap");
+  Z.forEach(z=>{
+    const el=$("z-"+z.id); if(!el) return;
+    const show=e=>{
+      const b=box.getBoundingClientRect();
+      const x=(e.clientX??b.left+b.width/2)-b.left, y=(e.clientY??b.top)-b.top;
+      tip.innerHTML=`<b>${z.n}</b>Clave Excel · ${z.ex}<br>Distancia al I/O · ${z.d} m<br>`+
+        `Ubicaciones reales · ${z.u}<br>Líneas de picking · ${z.h||"s/d"}<br>Vértices · ${z.p.trim().split(/\s+/).length}`;
+      tip.style.opacity=1;
+      tip.style.left=Math.min(x+14,b.width-240)+"px";
+      tip.style.top=Math.max(y-10,4)+"px";
+      hi(z.id,true);
+    };
+    el.onmousemove=show; el.onfocus=show;
+    el.onmouseleave=el.onblur=()=>{tip.style.opacity=0;hi(z.id,false)};
+  });
+}
+["Tec","Den","Dis"].forEach((k,i)=>{
+  $("b"+k).onclick=()=>{modo=["tec","den","dis"][i];
+    ["Tec","Den","Dis"].forEach((kk,j)=>$("b"+kk).setAttribute("aria-pressed",j===i));draw()};
+});
+tabla();draw();
+</script>
+</body></html>

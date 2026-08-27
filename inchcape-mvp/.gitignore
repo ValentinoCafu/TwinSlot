@@ -1,0 +1,6 @@
+# SVG crudo exportado de Synoptic Designer -- pesa ~800KB por la imagen
+# de fondo trazada en base64, que no se usa en el frontend. La versión
+# liviana (layout-inchape-v3-limpio.svg, generada con
+# scripts/limpiar_layout_svg.py) es la que vive en el repo. Ver
+# LAYOUT-SVG-V3.md.
+layout  inchape v3.svg

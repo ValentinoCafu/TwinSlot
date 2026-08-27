@@ -1,0 +1,245 @@
+.plano-error,
+.plano-cargando {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--grafito2);
+  padding: 20px 0;
+}
+.plano-error {
+  color: var(--riesgo);
+}
+
+.panel {
+  background: var(--tiza);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-sm);
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.panel > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 18px 22px 14px;
+  flex-wrap: wrap;
+}
+.panel > header h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  color: var(--grafito);
+}
+.panel > header .note {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--grafito2);
+}
+.panel-body {
+  padding: 4px 22px 22px;
+}
+.table-panel {
+  margin-top: 18px;
+}
+
+.ctrl {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radio-pill);
+  background: rgba(0, 0, 0, 0.05);
+  margin-bottom: 14px;
+}
+.ctrl button {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13.5px;
+  padding: 6px 14px;
+  border-radius: var(--radio-pill);
+  border: 0;
+  background: none;
+  color: var(--grafito2);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.ctrl button[aria-pressed='true'] {
+  background: var(--tiza);
+  color: var(--grafito);
+  box-shadow: var(--sombra-sm);
+}
+.ctrl button:focus-visible {
+  outline: 2px solid var(--senal);
+  outline-offset: 2px;
+}
+
+.planwrap {
+  position: relative;
+  background: var(--tiza);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-md);
+  overflow: hidden;
+}
+svg.plan {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.zone {
+  /* Oscuro y fijo, no blanco -- una zona sin ocupación se pinta de
+   * blanco (ver fill() en MapaOcupacion/colorModos), y un borde blanco
+   * sobre relleno blanco la hacía desaparecer del mapa por completo. */
+  stroke: rgba(29, 29, 31, 0.35);
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition:
+    fill 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s,
+    stroke-width 0.15s;
+}
+.zone:hover {
+  opacity: 0.8;
+}
+.zone:focus-visible {
+  outline: none;
+  stroke: var(--senal);
+}
+.lbl {
+  font-family: var(--font-display);
+  font-weight: 600;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.lbl.sm {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  stroke-width: 2.5px;
+}
+.plano-contorno {
+  fill: none;
+  stroke: var(--grafito);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  opacity: 0.5;
+}
+.dock {
+  fill: #fff;
+  stroke: var(--riesgo);
+  stroke-width: 1.1;
+}
+.docknum {
+  font-family: var(--font-mono);
+  font-size: 6.5px;
+  fill: var(--riesgo);
+  pointer-events: none;
+}
+.grid-m {
+  stroke: rgba(0, 0, 0, 0.05);
+  stroke-width: 0.8;
+}
+.io {
+  fill: var(--oro);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.tip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(29, 29, 31, 0.92);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 10px 13px;
+  border-radius: var(--radio-sm);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.55;
+  max-width: 230px;
+  z-index: 5;
+  box-shadow: var(--sombra-md);
+}
+.tip b {
+  color: var(--oro);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.legend {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linea);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--grafito2);
+}
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.caption {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--grafito2);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  padding: 0 12px 10px 0;
+  color: var(--grafito2);
+  border-bottom: 1px solid var(--linea);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--linea);
+}
+td.num {
+  font-family: var(--font-mono);
+  text-align: right;
+  padding-right: 14px;
+  white-space: nowrap;
+}
+tbody tr {
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+tbody tr:hover td,
+tbody tr.on td {
+  background: rgba(0, 113, 227, 0.06);
+}
+.sq {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  vertical-align: -2px;
+  margin-right: 8px;
+}
+.scroll {
+  overflow-x: auto;
+}

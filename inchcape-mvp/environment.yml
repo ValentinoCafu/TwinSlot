@@ -1,0 +1,87 @@
+########################################################################
+# Entorno Conda: IngenieriaPython
+#
+# Proposito: entorno unico de Python para las tres capas del MVP que
+# corren del lado del servidor (nunca en el navegador):
+#   1) Backend (FastAPI)               -> expone el pipeline como API
+#   2) Ciencia de datos / ML           -> score, PuLP, KMeans, afinidad
+#   3) Ingenieria de datos             -> ingesta, validacion, formatos
+#
+# No incluye nada de Node/npm/React -> eso vive en un entorno aparte
+# (frontend/), gestionado por npm, no por conda.
+#
+# que conda resuelva siempre la ultima version ESTABLE dentro de esa
+# linea -- evita tanto "bleeding edge" (romper con el jurado el 4 de
+# septiembre) como quedarse en una version vieja fijada a mano.
+#
+# Instalar:   conda env create -f environment.yml
+# Actualizar: conda env update -f environment.yml --prune
+########################################################################
+
+name: MVP-Inchape
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11                 # LTS de facto del ecosistema data/ML en 2026, soporte maduro en todas las libs de abajo
+  - nomkl                       # fuerza OpenBLAS en vez de MKL -- MKL 2026.1.0 + threadpoolctl crashea (OSError 0xc06d007f) dentro de KMeans.fit() en Windows, ver nota en el commit que agrego esto
+
+  # ------------------------------------------------------------------
+  # Backend -- FastAPI y su servidor ASGI
+  # ------------------------------------------------------------------
+  - fastapi=0.115.*              # framework de API (propuesta-arquitectura-tecnica-react-fastapi.md)
+  - uvicorn=0.32.*                # servidor ASGI de referencia para FastAPI
+  - pydantic=2.*                  # validacion de esquemas (request/response), viene de la mano de fastapi
+  - python-multipart=0.0.*        # requerido por FastAPI para recibir archivos (POST /ingesta)
+  - python-dotenv=1.*             # variables de entorno (rutas, config) sin hardcodear
+  - sqlalchemy=2.*                # capa de persistencia sobre SQLite (reglas, resultados del ultimo lote)
+  - httpx=0.27.*                  # cliente HTTP; tambien lo usa TestClient de FastAPI para pruebas
+
+  # ------------------------------------------------------------------
+  # Ingenieria de datos -- ingesta, mapeo configurable, formatos de archivo
+  # ------------------------------------------------------------------
+  - pyyaml=6.*                    # config_mapeo.yaml (capa de mapeo configurable de la sombra digital)
+  - openpyxl=3.1.*                 # lectura del Excel fuente (IMPULSA_CD_Practico_Estudiantes.xlsx)
+  - pyarrow=17.*                   # I/O columnar eficiente (parquet/feather) para lotes intermedios
+
+  # ------------------------------------------------------------------
+  # Ciencia de datos -- manipulacion y analisis
+  # ------------------------------------------------------------------
+  - pandas=2.2.*                   # base de todo el pipeline (indicadores, base maestra, matriz SKU x zona)
+  - numpy=1.26.*                    # algebra vectorial, base de pandas/sklearn/scipy
+  - scipy=1.13.*                    # tests estadisticos (chi2 ya usado en el proyecto, distribuciones)
+
+  # ------------------------------------------------------------------
+  # Machine learning y optimizacion
+  # ------------------------------------------------------------------
+  - scikit-learn=1.6.*              # KMeans + StandardScaler + silhouette -- fijado a 1.6 porque modelo_kmeans_reslotting_inchcape.joblib se serializo con sklearn 1.6.1 en Colab (confirmado via InconsistentVersionWarning al cargarlo con 1.5.2); no bajar de esta linea sin re-entrenar el .joblib
+  - joblib=1.4.*                    # carga del modelo_kmeans_reslotting_inchcape.joblib ya entrenado
+  - pulp=2.*                        # optimizacion de asignacion factible (motor de Valentino, Fase 10-11)
+  - networkx=3.*                     # grafo de co-ocurrencia SKU-SKU, base de la deteccion de comunidades
+  - python-louvain=0.16.*            # particionado de Louvain (modularidad) sobre el grafo de afinidad
+  - mlxtend=0.23.*                   # Apriori/FP-Growth para conjuntos frecuentes (Bloque E del scoring)
+
+  # ------------------------------------------------------------------
+  # Visualizacion de apoyo (graficos estaticos para notebooks/reportes;
+  # el frontend interactivo vive en React, no aqui)
+  # ------------------------------------------------------------------
+  - matplotlib=3.9.*
+  - seaborn=0.13.*
+  - pyvis=0.3.*                      # export HTML rapido del grafo de co-ocurrencia para inspeccion offline
+
+  # ------------------------------------------------------------------
+  # Notebooks (se mantiene compatibilidad con el .ipynb de Valentino
+  # mientras dura el refactor a modulos)
+  # ------------------------------------------------------------------
+  - jupyterlab=4.*
+  - ipykernel=6.*
+
+  # ------------------------------------------------------------------
+  # Calidad, pruebas y formateo
+  # ------------------------------------------------------------------
+  - pytest=8.*
+  - pytest-cov=5.*
+  - ruff=0.6.*                       # lint (reemplaza flake8+isort en una sola herramienta)
+  - black=24.*                       # formateo automatico consistente

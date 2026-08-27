@@ -1,0 +1,197 @@
+.peso-fila {
+  display: grid;
+  grid-template-columns: 170px 1fr 44px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.peso-etiqueta {
+  font-size: 12.5px;
+  color: var(--grafito2);
+}
+.peso-valor {
+  font-size: 12px;
+  text-align: right;
+}
+.peso-resultado {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--grafito2);
+}
+.peso-lista-cambios {
+  margin-top: 8px;
+  font-size: 12px;
+  padding-left: 18px;
+  color: var(--grafito2);
+}
+.peso-lista-cambios li {
+  margin-bottom: 3px;
+}
+
+.skus-ayuda {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--linea-fuerte);
+  background: var(--tiza);
+  color: var(--grafito2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.skus-ayuda:hover {
+  color: var(--senal);
+  border-color: var(--senal);
+}
+
+.skus-modal-glosario {
+  background: var(--tiza);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-lg);
+  width: min(560px, 100%);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px 28px 28px;
+}
+.skus-formula-total {
+  font-size: 11.5px;
+  color: var(--grafito2);
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: var(--radio-sm);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.skus-glosario-item {
+  margin-bottom: 14px;
+}
+.skus-glosario-item dt {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 2px;
+}
+.skus-glosario-item dd {
+  font-size: 12.5px;
+  color: var(--grafito2);
+  line-height: 1.5;
+  margin-bottom: 2px;
+}
+.skus-glosario-calculo {
+  font-size: 11.5px;
+}
+.skus-glosario-nota {
+  font-size: 11px;
+  color: var(--grafito2);
+  border-top: 1px solid var(--linea);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.skus-filtros {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.skus-buscar {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  padding: 8px 14px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-pill);
+  background: var(--tiza);
+  color: var(--grafito);
+  min-width: 220px;
+}
+.skus-buscar:focus-visible {
+  outline: 2px solid var(--senal);
+  outline-offset: 1px;
+}
+.skus-th {
+  cursor: pointer;
+  user-select: none;
+}
+.skus-th:hover {
+  color: var(--senal);
+}
+
+.skus-tabla .skus-grupo-actual {
+  border-left: 1px solid var(--linea-fuerte);
+  background: rgba(0, 0, 0, 0.015);
+}
+.skus-tabla .skus-grupo-recomendado {
+  border-left: 1px solid var(--linea-fuerte);
+  background: rgba(0, 113, 227, 0.03);
+}
+.skus-grupo {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--grafito2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.skus-expandir {
+  border: 0;
+  background: transparent;
+  color: var(--grafito2);
+  cursor: pointer;
+  font-size: 11px;
+  margin-left: 8px;
+  padding: 2px 6px;
+}
+.skus-expandir:hover {
+  color: var(--senal);
+}
+.skus-fila-detalle td {
+  background: var(--concreto);
+  padding: 16px 20px;
+}
+
+.detalle-sku {
+  padding-top: 2px;
+}
+.detalle-subtitulo {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 18px 0 10px;
+  color: var(--grafito);
+}
+.detalle-subtitulo:first-child {
+  margin-top: 0;
+}
+
+.barra-score {
+  display: grid;
+  grid-template-columns: 160px 1fr 60px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.barra-etiqueta {
+  font-size: 11.5px;
+  color: var(--grafito2);
+}
+.barra-pista {
+  background: rgba(0, 0, 0, 0.06);
+  height: 8px;
+  border-radius: var(--radio-pill);
+  overflow: hidden;
+}
+.barra-relleno {
+  background: var(--senal);
+  height: 100%;
+  border-radius: var(--radio-pill);
+}
+.barra-valor {
+  font-size: 11px;
+  text-align: right;
+}

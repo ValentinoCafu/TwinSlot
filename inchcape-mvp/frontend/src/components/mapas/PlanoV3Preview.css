@@ -1,0 +1,53 @@
+.plano-v3-nota {
+  font-size: 12px;
+  color: var(--grafito2);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.plano-v3-wrap {
+  position: relative;
+  background: var(--tiza);
+}
+
+.plano-v3-borde {
+  fill: rgba(0, 113, 227, 0.06);
+  stroke: var(--grafito2);
+  stroke-width: 1;
+}
+
+.plano-v3-espacio {
+  stroke: var(--linea-fuerte);
+  stroke-width: 0.3;
+  cursor: help;
+}
+.plano-v3-espacio.ocupado {
+  fill: var(--senal);
+}
+.plano-v3-espacio.libre {
+  fill: rgba(0, 0, 0, 0.04);
+}
+.plano-v3-espacio:hover {
+  stroke: var(--grafito);
+  stroke-width: 0.8;
+}
+
+.plano-v3-etiqueta {
+  font-family: var(--font-sans);
+  font-size: 6px;
+  font-weight: 600;
+  fill: var(--grafito2);
+}
+
+.plano-v3-tip {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(29, 29, 31, 0.92);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: var(--radio-sm);
+  pointer-events: none;
+}

@@ -1,0 +1,62 @@
+# Capa de mapeo configurable -- traduce nombre-de-origen a nombre-canonico
+# sin tocar codigo. Este archivo refleja el Excel de practica (identidad).
+#
+# Cuando llegue un export real de SAP MM / WMS Brainsys con otros nombres
+# de columna, se edita SOLO este archivo: se cambia el valor de la derecha
+# (columna de origen real) dejando la clave de la izquierda (nombre
+# canonico que usa el resto del pipeline) intacta.
+#
+# Ejemplo si SAP exportara "MATERIAL" en vez de "SKU":
+#   sku_maestro:
+#     columnas:
+#       SKU: MATERIAL      # <- unico cambio necesario
+
+sku_maestro:
+  hoja: MAESTRO_SKUs
+  columnas:
+    SKU: SKU
+    MARCA: MARCA
+    FAMILIA: FAMILIA
+    VOLUMEN_M3: VOLUMEN_M3
+    PESO_KG: PESO_KG
+
+rotacion:
+  hoja: ROTACIÓN
+  columnas:
+    SKU: SKU
+    ROTACION_6M: ROTACION_6M
+    ABC: ABC
+
+stock_actual:
+  hoja: STOCK_ACTUAL
+  columnas:
+    UBICACION: UBICACIÓN
+    SKU: SKU
+    ZONA_ACTUAL: ZONA_ACTUAL
+
+layout_cd:
+  hoja: LAYOUT_CD
+  columnas:
+    ZONA: ZONA
+    DISTANCIA_METROS: DISTANCIA_METROS
+    TIEMPO_MINUTOS: TIEMPO_MINUTOS
+    CAPACIDAD_M3_MAX: CAPACIDAD_M3_MAX
+
+ocupacion_zona:
+  hoja: OCUPACION_POR_ZONA
+  columnas:
+    ZONA: ZONA
+    CAPACIDAD_MAX_M3: CAPACIDAD_MAX_M3
+    VOLUMEN_USADO_M3: VOLUMEN_USADO_M3
+    VOLUMEN_DISPONIBLE_M3: VOLUMEN_DISPONIBLE_M3
+    PORCENTAJE_USO: PORCENTAJE_USO_%
+
+pedidos:
+  hoja: PEDIDOS ACTUAL
+  columnas:
+    PEDIDO_ID: PEDIDO_ID
+    LINEA: LINEA
+    SKU: SKU
+    CANTIDAD: CANTIDAD
+    ZONA_ACTUAL: ZONA_ACTUAL
+    TIEMPO_HOY_MIN: TIEMPO_HOY_MIN

@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* Pivote de identidad visual: de "blueprint técnico" (concreto/grafito/oro,
+   Barlow Condensed + IBM Plex Mono) a un lenguaje tipo Apple -- neutros,
+   mucho blanco, un solo acento, tipografía del sistema. Se mantienen los
+   MISMOS nombres de variable que usa el resto de la app (decenas de
+   referencias en otros CSS) para no tener que tocar archivo por archivo;
+   lo que cambia es el valor detrás de cada token. */
+:root {
+  --concreto: #e9e9ec; /* fondo de página */
+  --tiza: #ffffff; /* fondo de tarjeta/panel */
+  --grafito: #1d1d1f; /* texto primario, casi negro */
+  --grafito2: #48484d; /* texto secundario */
+  --oro: #0071e3; /* acento -- antes dorado, ahora el azul de acento (systemBlue claro) */
+  --senal: #0071e3;
+  --riesgo: #ff3b30; /* systemRed claro */
+  --exito: #34c759; /* systemGreen claro */
+  --linea: rgba(0, 0, 0, 0.14);
+  --linea-fuerte: rgba(0, 0, 0, 0.22);
+
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05);
+  --sombra-md: 0 6px 20px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --sombra-lg: 0 24px 48px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --radio-sm: 10px;
+  --radio-md: 16px;
+  --radio-lg: 22px;
+  --radio-pill: 980px;
+
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  color-scheme: light dark;
+}
+
+/* Modo oscuro -- misma paleta de sistema de Apple (systemBlue/Red/Green
+   "dark", secondaryLabel, secondarySystemBackground), no colores inventados.
+   Se aplica por preferencia del SO (@media) y se puede forzar con
+   data-theme (ver hooks/useTema.ts) -- el atributo manual siempre gana. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --concreto: #1c1c1e;
+    --tiza: #2c2c2e;
+    --grafito: #f5f5f7;
+    --grafito2: #98989d;
+    --oro: #0a84ff;
+    --senal: #0a84ff;
+    --riesgo: #ff453a;
+    --exito: #32d74b;
+    --linea: rgba(255, 255, 255, 0.14);
+    --linea-fuerte: rgba(255, 255, 255, 0.24);
+    --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+    --sombra-md: 0 6px 20px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --sombra-lg: 0 24px 48px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+}
+:root[data-theme='dark'] {
+  --concreto: #1c1c1e;
+  --tiza: #2c2c2e;
+  --grafito: #f5f5f7;
+  --grafito2: #98989d;
+  --oro: #0a84ff;
+  --senal: #0a84ff;
+  --riesgo: #ff453a;
+  --exito: #32d74b;
+  --linea: rgba(255, 255, 255, 0.14);
+  --linea-fuerte: rgba(255, 255, 255, 0.24);
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --sombra-md: 0 6px 20px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --sombra-lg: 0 24px 48px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--concreto);
+  color: var(--grafito);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
